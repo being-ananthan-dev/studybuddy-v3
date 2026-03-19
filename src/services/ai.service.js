@@ -7,12 +7,13 @@ export async function askGemini(prompt, systemInstruction = '') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, systemInstruction })
     })
-    if (!res.ok) throw new Error('API Error')
     const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Server API Error')
+    
     return data.result || 'No response.'
   } catch (err) {
-    console.warn('Gemini API unavailable, returning mock:', err)
-    return `[AI Mock] I'd answer about "${prompt.substring(0, 50)}..." but the AI backend isn't connected yet. Set up your GEMINI_API_KEY in Netlify environment variables.`
+    console.warn('Gemini API unavailable or errored:', err)
+    return `[API Error]: ${err.message}. If deploying to Vercel, ensure you added GEMINI_API_KEY in the Vercel project settings and triggered a Redeploy.`
   }
 }
 
