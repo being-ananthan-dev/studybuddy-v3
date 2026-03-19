@@ -1,4 +1,4 @@
-const API_URL = '/api/gemini'
+const API_URL = '/api/chat'
 
 export async function askGemini(prompt, systemInstruction = '') {
   try {
@@ -12,8 +12,8 @@ export async function askGemini(prompt, systemInstruction = '') {
     
     return data.result || 'No response.'
   } catch (err) {
-    console.warn('Gemini API unavailable or errored:', err)
-    return `[API Error]: ${err.message}. If deploying to Vercel, ensure you added GEMINI_API_KEY in the Vercel project settings and triggered a Redeploy.`
+    console.warn('Hugging Face API unavailable or errored:', err)
+    return `[API Error]: ${err.message}. If deploying to Vercel, ensure you added HUGGINGFACE_API_KEY in the Vercel project settings and triggered a Redeploy.`
   }
 }
 
