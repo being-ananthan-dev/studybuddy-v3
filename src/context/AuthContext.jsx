@@ -1,72 +1,46 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react'
-import { auth } from '../services/firebase.config'
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signOut
-} from 'firebase/auth'
 import { useToast } from './ToastContext'
 
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  // Bypass Firebase completely and provide a static local user profile
+  // so the Chat and Sidebar features still function beautifully!
+  const [user, setUser] = useState(() => {
+    const savedName = localStorage.getItem('sb_temp_name') || 'Student'
+    return { 
+      uid: 'local-desktop-user-123', 
+      displayName: savedName, 
+      photoURL: `https://ui-avatars.com/api/?name=${savedName}&background=random` 
+    }
+  })
+  
+  const [loading] = useState(false)
   const { addToast } = useToast()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-      setLoading(false)
-    })
-    return () => unsubscribe()
-  }, [])
+    // Simulate a gentle welcome popup without hitting any external APIs
+    addToast(`Welcome to StudyBuddy, ${user.displayName}! 🎉`, 'success')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty array ensures this only happens once per session load
 
-  const signup = async (name, email, password) => {
-    try {
-      // Create user
-      const result = await createUserWithEmailAndPassword(auth, email, password)
-      
-      // Attach name to the user profile
-      await updateProfile(result.user, { displayName: name })
-      
-      // Update local state explicitly since onAuthStateChanged might not catch the immediate name update
-      setUser({ ...result.user, displayName: name })
-
-      addToast(`Welcome to StudyBuddy, ${name}! 🎉`, 'success')
-      return result.user
-    } catch (error) {
-      console.error("Signup failed", error)
-      addToast(error.message.replace('Firebase: Error (', '').replace(').', ''), 'error')
-      throw error
-    }
+  // Mock functions so nothing crashes if clicked
+  const signup = async (name) => {
+    localStorage.setItem('sb_temp_name', name)
+    setUser({ ...user, displayName: name })
+    addToast(`Profile updated to ${name}!`, 'success')
   }
 
-  const login = async (email, password) => {
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password)
-      const name = result.user.displayName || 'Student'
-      
-      addToast(`Welcome back, ${name}! Ready to focus? 💪`, 'info')
-      return result.user
-    } catch (error) {
-      console.error("Login failed", error)
-      addToast(error.message.replace('Firebase: Error (', '').replace(').', ''), 'error')
-      throw error
-    }
-  }
+  const login = async () => { return user }
 
   const logout = async () => {
-    await signOut(auth)
-    addToast('Logged out successfully', 'info')
+    addToast('You are now in offline guest mode.', 'info')
   }
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   )
 }

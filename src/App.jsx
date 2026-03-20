@@ -1,10 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Sidebar from './components/Sidebar'
 import ErrorBoundary from './components/ErrorBoundary'
-import PrivateRoute from './components/PrivateRoute'
 
-const Login      = lazy(() => import('./pages/Login'))
 const Home       = lazy(() => import('./pages/Home'))
 const AI         = lazy(() => import('./pages/AI'))
 const Planner    = lazy(() => import('./pages/Planner'))
@@ -60,17 +57,7 @@ function DashboardLayout() {
 export default function App() {
   return (
     <Suspense fallback={<Loader />}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route 
-          path="/*" 
-          element={
-            <PrivateRoute>
-              <DashboardLayout />
-            </PrivateRoute>
-          } 
-        />
-      </Routes>
+      <DashboardLayout />
     </Suspense>
   )
 }
