@@ -3,7 +3,7 @@ import { generateStudyPlan } from '../services/ai.service'
 
 export default function Planner() {
   const [subjects, setSubjects] = useState('')
-  const [hours, setHours] = useState('')
+  const [timeframe, setTimeframe] = useState('')
   const [plan, setPlan] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -11,7 +11,7 @@ export default function Planner() {
     e.preventDefault()
     setLoading(true); setPlan(null)
     try {
-      const p = await generateStudyPlan(subjects, hours)
+      const p = await generateStudyPlan(subjects, timeframe)
       setPlan(p)
     } catch { setPlan({ days: [] }) }
     finally { setLoading(false) }
@@ -32,8 +32,8 @@ export default function Planner() {
               <input value={subjects} onChange={e => setSubjects(e.target.value)} placeholder="e.g. Physics, Math" required />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: 'var(--s1)', fontWeight: 600, fontSize: '0.9rem' }}>Total Hours</label>
-              <input type="number" value={hours} onChange={e => setHours(e.target.value)} min="1" placeholder="e.g. 10" required />
+              <label style={{ display: 'block', marginBottom: 'var(--s1)', fontWeight: 600, fontSize: '0.9rem' }}>Timeframe</label>
+              <input type="text" value={timeframe} onChange={e => setTimeframe(e.target.value)} placeholder="e.g. 5 hours OR 3 days" required />
             </div>
             <button className="btn btn-primary btn-block" type="submit" disabled={loading}>{loading ? 'Generating...' : 'Generate Plan ✨'}</button>
           </form>
@@ -48,7 +48,7 @@ export default function Planner() {
           )}
           {plan?.days?.map((d, i) => (
             <div key={i} className="card mb-4">
-              <h3 style={{ color: 'var(--primary)', marginBottom: 'var(--s3)' }}>Day {d.day}</h3>
+              <h3 style={{ color: 'var(--primary)', marginBottom: 'var(--s3)' }}>{String(d.day).startsWith('Day') ? d.day : `Day ${d.day}`}</h3>
               {d.tasks.map((t, j) => (
                 <p key={j} style={{ padding: 'var(--s2) 0', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>✅ {t}</p>
               ))}

@@ -18,8 +18,14 @@ export async function askGemini(prompt, systemInstruction = '') {
   }
 }
 
-export async function generateStudyPlan(subjects, hours) {
-  const prompt = `Create a detailed study plan as JSON. Subjects: ${subjects}. Total hours: ${hours}. Format: {"days":[{"day":1,"tasks":["task1","task2"]}]}. Return ONLY valid JSON.`
+export const generateStudyPlan = async (subjects, timeframe) => {
+  const prompt = `Create a highly optimized study plan for the following subjects: ${subjects}.
+The duration available is: ${timeframe}.
+If the timeframe is specified in HOURS (e.g. '5 hours'), create exactly 1 day object containing an hourly breakdown of tasks.
+If the timeframe is specified in DAYS (e.g. '3 days'), create an array of day objects (Day 1, Day 2, etc.) containing the daily goals.
+You must return your response STRICTLY as a JSON object with this exact structure, completely stripping any markdown formatting or backticks:
+{ "days": [ { "day": "1", "tasks": ["Task 1", "Task 2"] } ] }`
+
   const raw = await askGemini(prompt, 'You are a study planning expert. Return only valid JSON.')
   try {
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```/g, '').trim()

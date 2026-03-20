@@ -1,5 +1,9 @@
 import { useState, useRef } from 'react'
 import { askGemini } from '../services/ai.service'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function AI() {
   const [messages, setMessages] = useState([
@@ -36,7 +40,11 @@ export default function AI() {
       <div className="card chat-box" style={{ padding: 0 }}>
         <div className="chat-history" ref={histRef}>
           {messages.map((m, i) => (
-            <div key={i} className={`chat-msg chat-${m.role} fade-in`}>{m.text}</div>
+            <div key={i} className={`chat-msg chat-${m.role} fade-in markdown-body`}>
+              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                {m.text}
+              </ReactMarkdown>
+            </div>
           ))}
           {loading && <div className="chat-msg chat-ai"><div className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></div></div>}
         </div>
