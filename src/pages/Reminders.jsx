@@ -2,7 +2,19 @@ import { useState, useEffect, useRef } from 'react'
 import { idbSave, idbGetAll, idbDelete } from '../services/indexeddb.service'
 import { useToast } from '../context/ToastContext'
 
-// Simple default repeating beep data URI for alarm sound
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 const alarmSoundUri = 'data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq/'
 
 export default function Reminders() {
@@ -16,41 +28,29 @@ export default function Reminders() {
 
   useEffect(() => { idbGetAll('reminders').then(setReminders).catch(() => {}) }, [])
 
-  // Top-level Alarm Monitor loop (checks every 10 seconds)
   useEffect(() => {
     if (reminders.length === 0) return
-
     const interval = setInterval(() => {
       const now = new Date()
       reminders.forEach(async r => {
         if (!r.completed && r.targetTime) {
           const target = new Date(r.targetTime)
-          // Trigger alarm if the current minute matches the target minute and it hasn't fired yet
           if (now.getHours() === target.getHours() && now.getMinutes() === target.getMinutes() && !r.fired) {
             triggerAlarm(r)
           }
         }
       })
     }, 10000)
-
     return () => clearInterval(interval)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reminders])
 
   const triggerAlarm = async (reminder) => {
-    // Attempt to play sound (browsers might block this without user interaction, but we'll try)
-    if (audioRef.current) {
-      audioRef.current.play().catch(e => console.log('Audio autoplay blocked', e))
-    }
-    
-    // HTML5 Notification
+    if (audioRef.current) audioRef.current.play().catch(e => console.log('Audio autoplay blocked', e))
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(`🚨 ${reminder.priority} Priority Alarm`, { body: reminder.text })
     }
-
     addToast(`ALARM: ${reminder.text}`, reminder.priority === 'High' ? 'error' : 'info')
-
-    // Mark as fired so it doesn't loop forever during the same minute
     const updated = { ...reminder, fired: true }
     setReminders(rs => rs.map(x => x.id === reminder.id ? updated : x))
     try { await idbSave('reminders', updated) } catch { /* ignore */ }
@@ -61,16 +61,10 @@ export default function Reminders() {
     if (!input.trim()) return
     
     const r = { 
-      id: Date.now(), 
-      text: input, 
-      targetTime: targetTime || null,
-      priority: priority,
-      completed: false,
-      fired: false
+      id: Date.now(), text: input, targetTime: targetTime || null, priority, completed: false, fired: false
     }
     
     const updated = [...reminders, r].sort((a,b) => {
-      // Sort by incomplete first, then priority (High -> Medium -> Low), then creation
       const weight = { 'High': 3, 'Medium': 2, 'Low': 1 }
       if (a.completed !== b.completed) return a.completed ? 1 : -1
       return weight[b.priority] - weight[a.priority]
@@ -85,7 +79,6 @@ export default function Reminders() {
     if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
       Notification.requestPermission()
     }
-    
     addToast('Alarm Set!', 'success')
   }
 
@@ -101,69 +94,85 @@ export default function Reminders() {
     addToast('Alarm Deleted', 'info')
   }
 
-  const getPriorityColor = (p) => {
-    if (p === 'High') return 'var(--error)'
-    if (p === 'Medium') return 'var(--primary)'
-    return 'var(--text-3)'
-  }
-
   return (
-    <div className="slide-up" style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
       <audio ref={audioRef} src={alarmSoundUri} />
       
-      <div className="section-header mb-6"><h1>Priority Alarms</h1><p>Trigger loud alerts and push notifications for critical tasks</p></div>
-      
-      <div className="card mb-6" style={{ padding: 'var(--s6)' }}>
-        <h3 className="mb-4">🚨 Create New Alarm</h3>
-        <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s4)' }} onSubmit={add}>
-          <div>
-             <label style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', marginBottom: 'var(--s1)' }}>Alarm Title</label>
-             <input value={input} onChange={e => setInput(e.target.value)} placeholder="e.g. History Exam Study Session" required />
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--s4)' }}>
-            <div>
-              <label style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', marginBottom: 'var(--s1)' }}>Target Time (Optional)</label>
-              <input type="datetime-local" value={targetTime} onChange={e => setTargetTime(e.target.value)} />
-            </div>
-            <div>
-              <label style={{ fontWeight: 600, fontSize: '0.85rem', display: 'block', marginBottom: 'var(--s1)' }}>Priority Level</label>
-              <select value={priority} onChange={e => setPriority(e.target.value)}>
-                <option value="High">🔴 High Priority (Immediate Action)</option>
-                <option value="Medium">🟠 Medium Priority (Scheduled Task)</option>
-                <option value="Low">🟢 Low Priority (Casual Reminder)</option>
-              </select>
-            </div>
-          </div>
-          
-          <button className="btn btn-primary" type="submit" style={{ marginTop: 'var(--s2)' }}>Arm System</button>
-        </form>
+      <div className="mb-10 text-center lg:text-left">
+        <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-2">Priority Alarms</h1>
+        <p className="text-muted-foreground text-sm">Deploy high-frequency audible relays and browser push notifications</p>
       </div>
+      
+      <Card className="p-8 mb-8 border-border/50 shadow-sm bg-gradient-to-br from-card to-secondary/5">
+        <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><span>🚨</span> Hardware Alarm Deployment</h3>
+        <form className="flex flex-col gap-5" onSubmit={add}>
+          <div>
+             <label className="font-semibold text-sm mb-2 block">Task Title</label>
+             <Input value={input} onChange={e => setInput(e.target.value)} placeholder="e.g. History Exam Study Session" required className="bg-background"/>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="font-semibold text-sm mb-2 block">Target Triggertime <span className="text-muted-foreground font-normal">(Optional)</span></label>
+              <Input type="datetime-local" value={targetTime} onChange={e => setTargetTime(e.target.value)} className="bg-background"/>
+            </div>
+            <div>
+              <label className="font-semibold text-sm mb-2 block">System Priority</label>
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger className="w-full bg-background">
+                  <SelectValue placeholder="Select Threat Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="High" className="text-destructive font-bold">🔴 High (Immediate Action)</SelectItem>
+                  <SelectItem value="Medium" className="text-primary font-bold">🟠 Medium (Scheduled)</SelectItem>
+                  <SelectItem value="Low" className="text-muted-foreground font-bold">🟢 Low (Casual Reminder)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <Button type="submit" size="lg" className="mt-2 w-full md:w-auto self-end font-bold tracking-wide shadow-md">
+            Arm Relay
+          </Button>
+        </form>
+      </Card>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s3)' }}>
-        {reminders.length === 0 && <div className="card text-center" style={{ padding: 'var(--s8)', color: 'var(--text-3)' }}><p style={{ fontSize: '2rem' }}>🕒</p><p>No active alarms</p></div>}
+      <div className="flex flex-col gap-3">
+        {reminders.length === 0 && (
+          <Card className="p-10 text-center text-muted-foreground border-dashed border-2 bg-secondary/5">
+            <p className="text-5xl mb-4 opacity-50">🕒</p>
+            <p className="font-semibold">All relay servers silent. No active constraints.</p>
+          </Card>
+        )}
+        
         {reminders.map(r => (
-          <div key={r.id} className="card" style={{ padding: 'var(--s4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: `4px solid ${r.completed ? 'transparent' : getPriorityColor(r.priority)}` }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--s3)' }}>
-              <input type="checkbox" checked={r.completed} onChange={() => toggle(r.id)} style={{ width: 22, height: 22, accentColor: 'var(--primary)', cursor: 'pointer', marginTop: 4 }} />
+          <Card key={r.id} className={`p-4 xl:p-5 flex justify-between items-center transition-all hover:shadow-md ${r.completed ? 'opacity-50 grayscale bg-secondary/20 border-r-4 border-r-transparent' : r.priority === 'High' ? 'border-l-4 border-l-destructive shadow-sm' : r.priority === 'Medium' ? 'border-l-4 border-l-primary shadow-sm' : 'border-l-4 border-l-border'}`}>
+            <div className="flex items-start gap-4">
+              <Checkbox 
+                checked={r.completed} 
+                onCheckedChange={() => toggle(r.id)} 
+                className="mt-1 w-5 h-5 rounded-sm data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground border-primary/50"
+              />
               <div>
-                <span style={{ fontSize: '1rem', fontWeight: 600, textDecoration: r.completed ? 'line-through' : 'none', color: r.completed ? 'var(--text-3)' : 'var(--text-1)' }}>
+                <span className={`text-[0.95rem] font-bold block mb-1 ${r.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                   {r.text}
                 </span>
-                <div style={{ display: 'flex', gap: 'var(--s3)', marginTop: 'var(--s1)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: 12, background: 'var(--surface-hover)', color: getPriorityColor(r.priority) }}>
-                    {r.priority} Priority
-                  </span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant={r.priority === 'High' ? 'destructive' : r.priority === 'Medium' ? 'default' : 'secondary'} className="text-[0.65rem] px-2 py-0 uppercase tracking-widest shadow-none">
+                    {r.priority}
+                  </Badge>
                   {r.targetTime && (
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', borderRadius: 12, background: r.fired ? 'rgba(255,0,0,0.1)' : 'var(--primary-ultra-light)', color: r.fired ? 'var(--error)' : 'var(--primary)' }}>
+                    <Badge variant="outline" className={`text-[0.65rem] px-2 py-0 border-border/50 font-semibold uppercase tracking-wider ${r.fired ? 'bg-destructive/10 text-destructive border-transparent' : 'bg-primary/5 text-primary border-primary/20'}`}>
                       ⏱️ {new Date(r.targetTime).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </div>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => del(r.id)} style={{ color: 'var(--error)' }}>✕</button>
-          </div>
+            <Button variant="ghost" size="icon" onClick={() => del(r.id)} className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive shrink-0 h-8 w-8 ms-4">
+              ✕
+            </Button>
+          </Card>
         ))}
       </div>
     </div>

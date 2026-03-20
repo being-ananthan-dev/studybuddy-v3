@@ -1,40 +1,60 @@
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+
 export default function Profile() {
   const stats = [
-    { icon: '🔥', value: '4', label: 'Day Streak', bg: 'hsla(32,95%,52%,0.12)' },
-    { icon: '⏱️', value: '12h', label: 'Total Focus', bg: 'hsla(250,85%,60%,0.1)' },
-    { icon: '📝', value: '28', label: 'Notes', bg: 'hsla(152,68%,42%,0.1)' },
-    { icon: '🏆', value: '2', label: 'Badges', bg: 'hsla(320,80%,58%,0.1)' },
+    { icon: '🔥', value: '4', label: 'Day Streak', bg: 'bg-orange-500/10 text-orange-600' },
+    { icon: '⏱️', value: '12h', label: 'Total Focus', bg: 'bg-primary/10 text-primary' },
+    { icon: '📝', value: '28', label: 'Notes', bg: 'bg-emerald-500/10 text-emerald-600' },
+    { icon: '🏆', value: '2', label: 'Badges', bg: 'bg-pink-500/10 text-pink-600' },
   ]
 
   return (
-    <div className="slide-up" style={{ maxWidth: 600, margin: '0 auto' }}>
-      <div className="section-header mb-6"><h1>Your Profile</h1><p>Stats and account details</p></div>
-      <div className="card mb-6" style={{ padding: 'var(--s8)', textAlign: 'center' }}>
-        <div style={{ width: 90, height: 90, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto var(--s4)', color: '#fff', fontSize: '2.2rem', fontWeight: 700 }}>S</div>
-        <h2 className="mb-2">Student</h2>
-        <p className="text-sm text-muted">student@studybuddy.app</p>
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-3xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Student Profile</h1>
+        <p className="text-muted-foreground text-sm">Access local metadata parameters and identity tokens</p>
       </div>
-      <div className="grid grid-2 mb-6">
+
+      <Card className="p-10 mb-8 border-border/50 shadow-sm text-center relative overflow-hidden bg-gradient-to-b from-primary/5 to-transparent">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"></div>
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-5 shadow-lg flex items-center justify-center text-white text-4xl font-extrabold border-4 border-background ring-4 ring-primary/10 -mt-2">
+          S
+        </div>
+        <h2 className="text-2xl font-black tracking-tight mb-1 text-foreground">Student Identity</h2>
+        <p className="text-sm font-semibold text-muted-foreground">student@studybuddy.app</p>
+        <Badge variant="secondary" className="mt-4 uppercase tracking-widest text-[0.65rem] font-bold">Free Academic Tier</Badge>
+      </Card>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {stats.map((s, i) => (
-          <div key={i} className="stat-card">
-            <div className="stat-icon" style={{ background: s.bg }}>{s.icon}</div>
-            <div><div className="stat-value">{s.value}</div><div className="stat-label">{s.label}</div></div>
-          </div>
+          <Card key={i} className="p-5 flex flex-col items-center text-center hover:-translate-y-1 transition-transform shadow-sm border-border/50 bg-card group">
+            <div className={`text-2xl w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${s.bg} group-hover:scale-110 duration-300`}>
+              {s.icon}
+            </div>
+            <div className="text-2xl font-black mb-1 leading-none">{s.value}</div>
+            <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground">{s.label}</div>
+          </Card>
         ))}
       </div>
-      <div className="card" style={{ padding: 'var(--s5)' }}>
-        <h3 className="mb-3">Account Details</h3>
-        {[
-          ['Sync Status', <span style={{ color: 'var(--success)' }}>Cloud Active</span>],
-          ['Member Since', 'March 2026'],
-          ['App Version', 'V3 React'],
-        ].map(([label, value], i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--s2) 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none', fontSize: '0.9rem' }}>
-            <span className="text-muted">{label}</span>
-            <span>{value}</span>
-          </div>
-        ))}
-      </div>
+
+      <Card className="p-6 border-border/50 shadow-sm">
+        <h3 className="text-lg font-bold mb-4 border-b border-border/50 pb-3 flex items-center gap-2"><span>🛡️</span> Technical Metadata</h3>
+        
+        <div className="flex flex-col">
+          {[
+            ['Datastore Relay', <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 font-bold shadow-none">Firebase Cloud Online</Badge>],
+            ['Account Instantiated', <span className="font-semibold text-foreground">March 2026</span>],
+            ['Engine Version', <span className="font-semibold text-foreground">V4 React / Native DOM</span>],
+            ['Data Privacy', <span className="font-semibold text-foreground">End-to-end Local Fallback (IndexedDB)</span>],
+          ].map(([label, value], i) => (
+            <div key={i} className={`flex items-center justify-between py-4 ${i < 3 ? 'border-b border-border/40' : ''}`}>
+              <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{label}</span>
+              <div className="text-sm text-right">{value}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   )
 }

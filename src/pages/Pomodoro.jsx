@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useToast } from '../context/ToastContext'
 
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+
 const fmt = s => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
 
-// FIX: Use refs for mutable state accessed inside setInterval to avoid stale closures
 export default function Pomodoro() {
   const [display, setDisplay] = useState('25:00')
   const [running, setRunning] = useState(false)
@@ -16,7 +18,6 @@ export default function Pomodoro() {
   const cyclesRef = useRef(0)
   const intervalRef = useRef(null)
 
-  // Keep refs synced with state
   useEffect(() => { modeRef.current = mode }, [mode])
   useEffect(() => { cyclesRef.current = cycles }, [cycles])
 
@@ -63,62 +64,58 @@ export default function Pomodoro() {
     setDisplay('25:00')
   }
 
-  // Cleanup on unmount
   useEffect(() => () => clearTimer(), [])
 
-  const borderColor = mode === 'focus' ? 'var(--primary)' : 'var(--success)'
+  const borderColor = mode === 'focus' ? 'border-primary' : 'border-emerald-500'
   const totalFocus = cycles * 25
 
   return (
-    <div className="slide-up" style={{ maxWidth: 550, margin: '0 auto', textAlign: 'center' }}>
-      <div className="section-header mb-6">
-        <h1>Pomodoro Timer</h1>
-        <p>Stay focused with 25/5 minute cycles</p>
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto text-center">
+      <div className="mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Pomodoro Timer</h1>
+        <p className="text-muted-foreground text-sm">Stay focused with algorithmic 25/5 minute cycles</p>
       </div>
 
-      <div className="card mb-6" style={{ padding: 'var(--s10)' }}>
-        <p className="text-sm mb-4" style={{ textTransform: 'uppercase', letterSpacing: 3, color: borderColor }}>
+      <Card className="p-10 border-border/50 shadow-sm flex flex-col items-center">
+        <p className={`text-xs font-bold uppercase tracking-[0.2em] mb-8 ${mode === 'focus' ? 'text-primary' : 'text-emerald-500'}`}>
           {mode === 'focus' ? 'Focus Session' : 'Break Time'}
         </p>
 
         {/* Circle timer */}
         <div
-          className={running ? 'pulse-glow' : ''}
-          style={{
-            width: 'min(260px, 65vw)', height: 'min(260px, 65vw)',
-            borderRadius: '50%', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', margin: '0 auto var(--s6)',
-            border: `5px solid ${borderColor}`, transition: 'border-color 0.4s',
-          }}
+          className={`
+            w-[min(260px,65vw)] h-[min(260px,65vw)] rounded-full flex items-center justify-center 
+            mb-10 border-[6px] transition-colors duration-500
+            ${borderColor}
+            ${running ? 'animate-pulse shadow-[0_0_30px_hsl(var(--primary)/0.2)]' : ''}
+          `}
         >
-          <span style={{
-            fontFamily: 'Outfit, sans-serif',
-            fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-            fontWeight: 800, fontVariantNumeric: 'tabular-nums',
-          }}>
+          <span className="font-sans text-[clamp(2.5rem,8vw,4rem)] font-extrabold tracking-tighter tabular-nums drop-shadow-sm">
             {display}
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--s3)', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--s6)' }}>
-          <button className="btn btn-primary btn-lg" onClick={toggleRun}>
-            {running ? 'Pause' : (display !== (mode === 'focus' ? '25:00' : '05:00') ? 'Resume' : 'Start')}
-          </button>
-          <button className="btn btn-outline" onClick={reset}>Reset</button>
+        <div className="flex gap-4 justify-center flex-wrap mb-10 w-full max-w-xs">
+          <Button size="lg" className="flex-1 text-md shadow-md hover:scale-105 transition-transform" onClick={toggleRun}>
+            {running ? 'Pause Timer' : (display !== (mode === 'focus' ? '25:00' : '05:00') ? 'Resume' : 'Start Focus')}
+          </Button>
+          <Button variant="outline" size="lg" className="px-6 border-border/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30" onClick={reset}>
+            Reset
+          </Button>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--s6)', justifyContent: 'center' }}>
+        <div className="flex gap-10 justify-center w-full border-t border-border/40 pt-8">
           <div className="text-center">
-            <div style={{ fontFamily: 'Outfit', fontSize: '1.4rem', fontWeight: 700 }}>{cycles}</div>
-            <div className="text-xs text-muted">Cycles</div>
+            <div className="text-3xl font-black">{cycles}</div>
+            <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mt-1">Cycles</div>
           </div>
-          <div style={{ width: 1, background: 'var(--border)' }} />
+          <div className="w-px bg-border/40" />
           <div className="text-center">
-            <div style={{ fontFamily: 'Outfit', fontSize: '1.4rem', fontWeight: 700 }}>{totalFocus}m</div>
-            <div className="text-xs text-muted">Total Focus</div>
+            <div className="text-3xl font-black">{totalFocus}<span className="text-lg text-muted-foreground ml-1">m</span></div>
+            <div className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mt-1">Total Focus</div>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

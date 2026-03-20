@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useToast } from '../context/ToastContext'
 
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+
 const fmt = s => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
 
 const ONLINE_COUNT = Math.floor(Math.random() * 20) + 5
 const AVATARS = ['A', 'B', 'C', 'D', 'E']
-const AVATAR_COLORS = ['hsl(200,60%,55%)', 'hsl(280,60%,55%)', 'hsl(45,70%,55%)', 'hsl(150,60%,45%)', 'hsl(330,60%,55%)']
+const AVATAR_COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500', 'bg-pink-500']
 
 export default function FocusRoom() {
   const [display, setDisplay] = useState('45:00')
@@ -40,70 +44,63 @@ export default function FocusRoom() {
   useEffect(() => () => clearTimer(), [])
 
   return (
-    <div className="slide-up" style={{ maxWidth: 650, margin: '0 auto', textAlign: 'center' }}>
-      <div className="section-header mb-8">
-        <h1>Live Focus Room</h1>
-        <p>Study silently together for accountability</p>
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-3xl mx-auto text-center">
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Live Focus Room</h1>
+        <p className="text-muted-foreground text-sm">Study silently together for global accountability</p>
       </div>
 
-      <div className="card mb-6" style={{ padding: 'var(--s10)' }}>
-        <p className="text-sm text-muted mb-4" style={{ textTransform: 'uppercase', letterSpacing: 2 }}>
+      <Card className="p-10 mb-6 border-border/50 shadow-sm flex flex-col items-center">
+        <Badge variant={running ? "default" : "secondary"} className="mb-6 uppercase tracking-wider text-[0.65rem]">
           {running ? 'Deep Focus Active' : 'Ready to Focus'}
-        </p>
+        </Badge>
 
-        <div style={{
-          fontFamily: 'Outfit, sans-serif',
-          fontSize: 'clamp(2.5rem, 10vw, 4.5rem)',
-          fontWeight: 800, fontVariantNumeric: 'tabular-nums',
-          color: running ? 'var(--success)' : 'var(--primary)',
-          marginBottom: 'var(--s6)',
-          transition: 'color 0.3s',
-        }}>
+        <div className={`
+          font-sans text-[clamp(3.5rem,10vw,5rem)] font-black tabular-nums tracking-tighter mb-8 transition-colors duration-300
+          ${running ? 'text-primary' : 'text-foreground'}
+        `}>
           {display}
         </div>
 
         {/* Avatar Stack */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--s3)' }}>
+        <div className="flex justify-center mb-4 isolate">
           {AVATARS.map((a, i) => (
-            <div key={i} style={{
-              width: 40, height: 40, borderRadius: '50%',
-              background: AVATAR_COLORS[i],
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontWeight: 700, fontSize: '0.8rem',
-              border: '3px solid var(--surface)',
-              marginLeft: i > 0 ? -12 : 0,
-              zIndex: 5 - i, position: 'relative',
-            }}>{a}</div>
+            <div key={i} className={`
+              w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs
+              border-2 border-background shadow-sm relative hover:z-50 hover:scale-110 transition-transform cursor-pointer
+              ${AVATAR_COLORS[i]}
+            `}
+            style={{ marginLeft: i > 0 ? '-12px' : '0', zIndex: 10 - i }}>
+              {a}
+            </div>
           ))}
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: 'var(--surface-hover)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: '0.7rem',
-            border: '3px solid var(--surface)',
-            marginLeft: -12, zIndex: 0, position: 'relative',
-            color: 'var(--text-2)',
-          }}>+{ONLINE_COUNT}</div>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary text-secondary-foreground font-bold text-xs border-2 border-background shadow-sm relative z-0" style={{ marginLeft: '-12px' }}>
+            +{ONLINE_COUNT}
+          </div>
         </div>
-        <p className="text-sm text-muted mb-6">{ONLINE_COUNT + AVATARS.length} buddies focusing now</p>
+        <p className="text-xs font-semibold text-muted-foreground tracking-wide mb-8">
+          {ONLINE_COUNT + AVATARS.length} BUDDIES FOCUSING NOW
+        </p>
 
-        <div style={{ display: 'flex', gap: 'var(--s3)', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-lg" onClick={toggleRun}>
-            {running ? 'Pause' : 'Start Focusing'}
-          </button>
-          <button className="btn btn-outline" onClick={reset}>Reset</button>
+        <div className="flex gap-4 justify-center w-full max-w-[280px]">
+          <Button size="lg" className="flex-1 shadow-md hover:scale-105 transition-transform" onClick={toggleRun}>
+            {running ? 'Pause' : 'Start Synchronization'}
+          </Button>
+          <Button variant="outline" size="lg" className="px-6 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 border-border/60" onClick={reset}>
+            Reset
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      <div className="card" style={{ padding: 'var(--s5)', textAlign: 'left' }}>
-        <h3 className="mb-3">🧘 Focus Tips</h3>
-        <ul style={{ color: 'var(--text-2)', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: 'var(--s2)' }}>
-          <li>• Put your phone on silent mode</li>
-          <li>• Close all social media tabs</li>
-          <li>• Take short breaks every 45 minutes</li>
-          <li>• Stay hydrated — keep water nearby 💧</li>
+      <Card className="p-6 text-left border-border/50 bg-secondary/5">
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><span>🧘</span> Deep Focus Engineering Parameters</h3>
+        <ul className="text-sm text-muted-foreground flex flex-col gap-3 font-medium">
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Enable Do Not Disturb on all hardware relays.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Terminate secondary social media application threads.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Initiate mandatory cooling cycles every 45 elapsed minutes.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Maintain optimal hydration levels (H2O buffer loaded).</li>
         </ul>
-      </div>
+      </Card>
     </div>
   )
 }

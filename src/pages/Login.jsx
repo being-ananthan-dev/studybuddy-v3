@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
 export default function Login() {
   const { user, login, signup } = useAuth()
   const navigate = useNavigate()
@@ -13,7 +17,6 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  // Auto-redirect if already logged in
   if (user) return <Navigate to="/" replace />
 
   const handleSubmit = async (e) => {
@@ -35,100 +38,96 @@ export default function Login() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 'var(--s6)',
-      background: 'radial-gradient(circle at 10% 20%, hsla(250, 85%, 60%, 0.15) 0%, transparent 50%), radial-gradient(circle at 90% 80%, hsla(320, 80%, 58%, 0.15) 0%, transparent 50%)'
-    }}>
-      <div className="card slide-up" style={{
-        maxWidth: 420,
-        width: '100%',
-        padding: 'var(--s8)',
-        background: 'var(--surface)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-lg)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--s5)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--s2)' }}>📚</div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1.8rem', marginBottom: 'var(--s1)' }}>
-            <span className="gradient-text">{isSignUp ? 'Create an Account' : 'Welcome Back'}</span>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(circle_at_10%_20%,hsla(250,85%,60%,0.08)_0%,transparent_50%),radial-gradient(circle_at_90%_80%,hsla(320,80%,58%,0.08)_0%,transparent_50%)]">
+      
+      <Card className="w-full max-w-md p-10 bg-background/80 backdrop-blur-2xl border-border/50 shadow-2xl animate-in fade-in zoom-in-95 duration-700 relative overflow-hidden">
+        {/* Decorative corner glows */}
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-primary/20 blur-[50px] rounded-full pointer-events-none"></div>
+        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-secondary/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+        <div className="text-center mb-10 relative z-10">
+          <div className="text-5xl mb-4 drop-shadow-sm animate-bounce [animation-duration:3s]">📚</div>
+          <h1 className="font-sans text-3xl font-extrabold tracking-tight mb-2 text-foreground">
+            {isSignUp ? 'Create Platform Identity' : 'Secure Connection'}
           </h1>
-          <p className="text-muted" style={{ fontSize: '0.9rem' }}>
-            {isSignUp ? 'Sign up to start studying smarter.' : 'Log in to continue your progress.'}
+          <p className="text-muted-foreground text-sm font-medium">
+            {isSignUp ? 'Initialize your student local datastore today.' : 'Provide clearance to re-enter your dashboard.'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s4)' }}>
-          
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-10">
           {isSignUp && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s1)' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-2)' }}>Full Name</label>
-              <input 
+            <div className="space-y-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Student Identifier String</label>
+              <Input 
                 type="text" 
                 placeholder="John Doe" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 required 
+                className="h-12 bg-background shadow-inner placeholder:text-muted-foreground/50 border-border/60 transition-colors focus-visible:ring-primary focus-visible:border-primary"
               />
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s1)' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-2)' }}>Email Address</label>
-            <input 
+          <div className="space-y-1">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Authentication Handle</label>
+            <Input 
               type="email" 
-              placeholder="you@school.edu" 
+              placeholder="student@school.edu" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
+              className="h-12 bg-background shadow-inner placeholder:text-muted-foreground/50 border-border/60 transition-colors focus-visible:ring-primary focus-visible:border-primary"
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s1)' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-2)' }}>Password</label>
-            <input 
+          <div className="space-y-1">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Security Token</label>
+            <Input 
               type="password" 
               placeholder="••••••••" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
               minLength={6}
+              className="h-12 bg-background shadow-inner font-mono tracking-widest placeholder:text-muted-foreground/30 border-border/60 transition-colors focus-visible:ring-primary focus-visible:border-primary"
             />
           </div>
 
-          <button 
+          <Button 
             type="submit"
-            className="btn btn-primary btn-block" 
-            style={{ height: 48, fontSize: '1.05rem', marginTop: 'var(--s2)', display: 'flex', justifyContent: 'center' }}
+            size="lg"
+            className="w-full h-12 mt-4 text-[0.95rem] font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-primary-foreground"
             disabled={isLoading}
           >
-            {isLoading ? <div className="spinner" style={{ width: 20, height: 20, borderTopColor: '#fff' }} /> : (isSignUp ? 'Sign Up' : 'Sign In')}
-          </button>
+            {isLoading ? (
+              <div className="flex items-center gap-3">
+                <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></span>
+                <span>Bridging...</span>
+              </div>
+            ) : (isSignUp ? 'Initialize User Nodes 🚀' : 'Authorize Handshake 🔐')}
+          </Button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 'var(--s5)' }}>
-          <p className="text-sm text-muted">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-            <button 
-              type="button"
-              className="btn btn-ghost" 
-              style={{ color: 'var(--primary)', padding: '0 8px', fontWeight: 600 }}
+        <div className="text-center mt-8 pt-6 border-t border-border/40 relative z-10">
+          <p className="text-sm font-semibold text-muted-foreground flex flex-col sm:flex-row items-center justify-center gap-2">
+            {isSignUp ? 'Existing academic clearance?' : "No identity array found?"}
+            <Button 
+              variant="link" 
+              className="p-0 h-auto font-black uppercase text-primary tracking-wider hover:no-underline hover:text-primary/80"
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setName('')
                 setPassword('')
               }}
             >
-              {isSignUp ? 'Log in' : 'Sign up'}
-            </button>
+              {isSignUp ? 'Request Handshake' : 'Initialize Root Node'}
+            </Button>
           </p>
         </div>
-
-      </div>
+      </Card>
+      
     </div>
   )
 }
