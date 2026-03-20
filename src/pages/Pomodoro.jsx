@@ -102,7 +102,7 @@ export default function Pomodoro() {
 
         <div style={{ display: 'flex', gap: 'var(--s3)', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--s6)' }}>
           <button className="btn btn-primary btn-lg" onClick={toggleRun}>
-            {running ? 'Pause' : (timeRef.current < (mode === 'focus' ? 25*60 : 5*60) ? 'Resume' : 'Start')}
+            {running ? 'Pause' : (display !== (mode === 'focus' ? '25:00' : '05:00') ? 'Resume' : 'Start')}
           </button>
           <button className="btn btn-outline" onClick={reset}>Reset</button>
         </div>

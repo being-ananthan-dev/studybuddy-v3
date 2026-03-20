@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useEffect, useState } from 'react'
 
@@ -19,6 +20,7 @@ const navItems = [
 
 export default function Sidebar() {
   const { theme, toggle } = useTheme()
+  const { user, logout } = useAuth()
   const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
   useEffect(() => {
@@ -61,9 +63,9 @@ export default function Sidebar() {
       ))}
 
       {/* Desktop footer */}
-      <div className="sidebar-footer">
+      <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s2)' }}>
         <button
-          className="nav-item"
+          className="nav-item mb-2"
           onClick={toggle}
           style={{ width: '100%', background: 'none', border: 'none' }}
           aria-label="Toggle theme"
@@ -71,6 +73,17 @@ export default function Sidebar() {
           <span className="nav-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
           <span>Theme</span>
         </button>
+        {user && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s2)', padding: 'var(--s2)', borderRadius: 'var(--radius)', background: 'var(--surface-hover)' }}>
+            <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'S'}&background=random`} alt="Profile" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user.displayName || 'Student'}</div>
+            </div>
+            <button onClick={logout} className="btn btn-ghost" style={{ padding: '6px', color: 'var(--error)' }} title="Logout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   )

@@ -16,19 +16,19 @@ export default function Reminders() {
     const updated = [...reminders, r]
     setReminders(updated)
     setInput('')
-    try { await idbSave('reminders', r) } catch {}
+    try { await idbSave('reminders', r) } catch { /* ignore error */ }
     addToast('Reminder added!', 'success')
   }
 
   const toggle = async (id) => {
     setReminders(rs => rs.map(r => r.id === id ? { ...r, completed: !r.completed } : r))
     const r = reminders.find(x => x.id === id)
-    if (r) { try { await idbSave('reminders', { ...r, completed: !r.completed }) } catch {} }
+    if (r) { try { await idbSave('reminders', { ...r, completed: !r.completed }) } catch { /* ignore error */ } }
   }
 
   const del = async (id) => {
     setReminders(rs => rs.filter(r => r.id !== id))
-    try { await idbDelete('reminders', id) } catch {}
+    try { await idbDelete('reminders', id) } catch { /* ignore error */ }
     addToast('Removed', 'info')
   }
 

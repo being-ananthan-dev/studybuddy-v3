@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { idbSave, idbGetAll, idbDelete } from '../services/indexeddb.service'
 import { searchNotes } from '../services/vector.service'
 import { useToast } from '../context/ToastContext'
@@ -7,7 +7,7 @@ export default function Notes() {
   const [notes, setNotes] = useState([])
   const [input, setInput] = useState('')
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
+
   const { addToast } = useToast()
 
   useEffect(() => { idbGetAll('notes').then(setNotes).catch(() => {}) }, [])
@@ -18,21 +18,19 @@ export default function Notes() {
     const updated = [...notes, note]
     setNotes(updated)
     setInput('')
-    try { await idbSave('notes', note) } catch {}
+    try { await idbSave('notes', note) } catch { /* ignore */ }
     addToast('Note saved!', 'success')
   }
 
   const del = async (id) => {
     setNotes(n => n.filter(x => x.id !== id))
-    try { await idbDelete('notes', id) } catch {}
+    try { await idbDelete('notes', id) } catch { /* ignore */ }
     addToast('Note deleted', 'info')
   }
 
-  useEffect(() => {
-    if (query.length < 3) { setResults([]); return }
-    // FIX: notes is in dep array so results instantly reflect newly saved notes
-    const found = searchNotes(query, notes)
-    setResults(found)
+  const results = useMemo(() => {
+    if (query.length < 3) return []
+    return searchNotes(query, notes)
   }, [query, notes])
 
   return (

@@ -1,19 +1,20 @@
-const API_URL = '/api/chat'
-
 export async function askGemini(prompt, systemInstruction = '') {
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, systemInstruction })
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Server API Error')
+    const encodedPrompt = encodeURIComponent(prompt)
+    // Using a keyless free public AI endpoint so no API keys are required anywhere
+    let url = `https://text.pollinations.ai/${encodedPrompt}?model=openai`
+    if (systemInstruction) {
+      url += `&system=${encodeURIComponent(systemInstruction)}`
+    }
+
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(await res.text() || 'API Error')
     
-    return data.result || 'No response.'
+    const text = await res.text()
+    return text || 'No response.'
   } catch (err) {
-    console.warn('Hugging Face API unavailable or errored:', err)
-    return `[API Error]: ${err.message}. If deploying to Vercel, ensure you added HUGGINGFACE_API_KEY in the Vercel project settings and triggered a Redeploy.`
+    console.warn('Free AI API unavailable or errored:', err)
+    return `[API Error]: ${err.message}. Ensure you have an active internet connection.`
   }
 }
 

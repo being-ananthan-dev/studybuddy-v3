@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const features = [
@@ -29,7 +30,7 @@ const quotes = [
 ]
 
 function Heatmap() {
-  const cells = Array.from({ length: 30 }, () => Math.floor(Math.random() * 5))
+  const [cells] = useState(() => Array.from({ length: 30 }, () => Math.floor(Math.random() * 5)))
   return (
     <div className="heatmap">
       {cells.map((level, i) => <div key={i} className="heat-cell" data-level={level} />)}
@@ -38,7 +39,7 @@ function Heatmap() {
 }
 
 export default function Home() {
-  const quote = quotes[Math.floor(Math.random() * quotes.length)]
+  const [quote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)])
 
   return (
     <div className="slide-up">
