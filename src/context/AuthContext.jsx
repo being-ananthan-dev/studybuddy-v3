@@ -1,7 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react'
-import { auth, googleProvider } from '../services/firebase.config'
-import { onAuthStateChanged, signInWithPopup, signOut, getAdditionalUserInfo } from 'firebase/auth'
+import { auth } from '../services/firebase.config'
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut
+} from 'firebase/auth'
 import { useToast } from './ToastContext'
 
 const AuthContext = createContext()
@@ -19,21 +25,36 @@ export function AuthProvider({ children }) {
     return () => unsubscribe()
   }, [])
 
-  const loginWithGoogle = async () => {
+  const signup = async (name, email, password) => {
     try {
-      const result = await signInWithPopup(auth, googleProvider)
-      const details = getAdditionalUserInfo(result)
-      const name = result.user.displayName?.split(' ')[0] || 'Student'
+      // Create user
+      const result = await createUserWithEmailAndPassword(auth, email, password)
       
-      if (details?.isNewUser) {
-        addToast(`Welcome to StudyBuddy, ${name}! 🎉`, 'success')
-      } else {
-        addToast(`Welcome back, ${name}! Ready to focus? 💪`, 'info')
-      }
+      // Attach name to the user profile
+      await updateProfile(result.user, { displayName: name })
+      
+      // Update local state explicitly since onAuthStateChanged might not catch the immediate name update
+      setUser({ ...result.user, displayName: name })
+
+      addToast(`Welcome to StudyBuddy, ${name}! 🎉`, 'success')
+      return result.user
+    } catch (error) {
+      console.error("Signup failed", error)
+      addToast(error.message.replace('Firebase: Error (', '').replace(').', ''), 'error')
+      throw error
+    }
+  }
+
+  const login = async (email, password) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      const name = result.user.displayName || 'Student'
+      
+      addToast(`Welcome back, ${name}! Ready to focus? 💪`, 'info')
       return result.user
     } catch (error) {
       console.error("Login failed", error)
-      addToast(error.message, 'error')
+      addToast(error.message.replace('Firebase: Error (', '').replace(').', ''), 'error')
       throw error
     }
   }
@@ -44,7 +65,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
       {!loading && children}
     </AuthContext.Provider>
   )
