@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext'
 import { useToast } from '../context/ToastContext'
 
 export default function Settings() {
-  const { theme, toggle } = useTheme()
+  const { theme, setSpecificTheme, themesList } = useTheme()
   const { addToast } = useToast()
   const [mood, setMood] = useState('neutral')
   const [age, setAge] = useState(() => localStorage.getItem('sb_age') || 'college')
@@ -21,10 +21,20 @@ export default function Settings() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--s4)' }}>
         <div className="card" style={{ padding: 'var(--s5)' }}>
           <h3 className="mb-4">🎨 Appearance</h3>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
-            <span style={{ fontWeight: 500 }}>Dark Mode</span>
-            <input type="checkbox" checked={theme === 'dark'} onChange={toggle} style={{ width: 22, height: 22, accentColor: 'var(--primary)', cursor: 'pointer' }} />
-          </label>
+          <p className="text-sm text-muted mb-4">Select your visual aesthetic</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px,1fr))', gap: 'var(--s2)' }}>
+            {themesList.map(t => (
+              <button 
+                key={t.id} 
+                className={`btn btn-sm ${theme === t.id ? 'btn-primary' : 'btn-outline'}`} 
+                style={{ textTransform: 'capitalize', display: 'flex', flexDirection: 'column', gap: 4, height: 'auto', padding: '12px 8px' }}
+                onClick={() => { setSpecificTheme(t.id); addToast(`${t.label} Theme Applied!`, 'success') }}
+              >
+                <div style={{ fontSize: '1.5rem' }}>{t.icon}</div>
+                <div>{t.label}</div>
+              </button>
+            ))}
+          </div>
         </div>
         <div className="card" style={{ padding: 'var(--s5)' }}>
           <h3 className="mb-4">🧘 Mood Engine</h3>

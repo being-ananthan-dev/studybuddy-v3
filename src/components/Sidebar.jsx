@@ -19,7 +19,7 @@ const navItems = [
 ]
 
 export default function Sidebar() {
-  const { theme, toggle } = useTheme()
+  const { theme, toggle, themesList } = useTheme()
   const { user, logout } = useAuth()
   const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
@@ -70,7 +70,7 @@ export default function Sidebar() {
           style={{ width: '100%', background: 'none', border: 'none' }}
           aria-label="Toggle theme"
         >
-          <span className="nav-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <span className="nav-icon">{themesList.find(t => t.id === theme)?.icon || '☀️'}</span>
           <span>Theme</span>
         </button>
         {user && (
