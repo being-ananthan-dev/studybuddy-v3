@@ -1,3 +1,4 @@
+import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Sidebar from './components/Sidebar'
 import ErrorBoundary from './components/ErrorBoundary'
