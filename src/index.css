@@ -1,206 +1,244 @@
+/* Google Fonts — must be before @tailwind for PostCSS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* =============================================
-   GOOGLE FONTS 
-   ============================================= */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap');
 
 /* =============================================
-   SHADCN CSS VARIABLES — HSL FORMAT (required for Tailwind to resolve bg-primary etc.)
+   THEME SYSTEM — All themes use Shadcn HSL format
    ============================================= */
 @layer base {
+
+  /* ---- LIGHT (default) ---- */
   :root {
-    /* Light theme (default) */
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    --background: 220 25% 97%;
+    --foreground: 224 71% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 250 85% 60%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 246 83% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 18% 92%;
-    --secondary-foreground: 222 47% 20%;
-    --muted: 220 18% 93%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 220 18% 92%;
-    --accent-foreground: 222 47% 11%;
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 220 40% 20%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 246 50% 94%;
+    --accent-foreground: 246 83% 44%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 250 85% 60%;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 246 83% 60%;
     --radius: 0.75rem;
   }
 
+  /* ---- DARK ---- */
   [data-theme="dark"] {
-    --background: 228 24% 7%;
-    --foreground: 220 20% 96%;
-    --card: 228 22% 11%;
-    --card-foreground: 220 20% 96%;
-    --popover: 228 22% 11%;
-    --popover-foreground: 220 20% 96%;
-    --primary: 250 85% 65%;
+    --background: 224 28% 5%;
+    --foreground: 213 31% 96%;
+    --card: 224 25% 9%;
+    --card-foreground: 213 31% 96%;
+    --popover: 224 25% 9%;
+    --popover-foreground: 213 31% 96%;
+    --primary: 246 91% 68%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 228 20% 16%;
-    --secondary-foreground: 220 20% 85%;
-    --muted: 228 20% 14%;
-    --muted-foreground: 220 12% 60%;
-    --accent: 228 20% 16%;
-    --accent-foreground: 220 20% 96%;
-    --destructive: 4 80% 60%;
+    --secondary: 224 20% 14%;
+    --secondary-foreground: 213 25% 80%;
+    --muted: 224 20% 12%;
+    --muted-foreground: 215 14% 54%;
+    --accent: 246 50% 18%;
+    --accent-foreground: 246 91% 78%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 228 18% 18%;
-    --input: 228 18% 18%;
-    --ring: 250 85% 65%;
+    --border: 224 18% 16%;
+    --input: 224 18% 16%;
+    --ring: 246 91% 68%;
   }
 
+  /* ---- OCEAN ---- */
   [data-theme="ocean"] {
-    --background: 200 30% 8%;
-    --foreground: 200 20% 96%;
-    --card: 200 26% 12%;
-    --card-foreground: 200 20% 96%;
-    --popover: 200 26% 12%;
-    --popover-foreground: 200 20% 96%;
-    --primary: 190 90% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 200 22% 18%;
-    --secondary-foreground: 200 20% 85%;
-    --muted: 200 20% 15%;
-    --muted-foreground: 200 12% 60%;
-    --accent: 200 22% 18%;
-    --accent-foreground: 200 20% 96%;
-    --destructive: 4 80% 60%;
+    --background: 200 40% 6%;
+    --foreground: 196 30% 96%;
+    --card: 200 35% 10%;
+    --card-foreground: 196 30% 96%;
+    --popover: 200 35% 10%;
+    --popover-foreground: 196 30% 96%;
+    --primary: 188 90% 50%;
+    --primary-foreground: 200 40% 4%;
+    --secondary: 200 28% 16%;
+    --secondary-foreground: 196 20% 82%;
+    --muted: 200 28% 13%;
+    --muted-foreground: 196 15% 55%;
+    --accent: 188 60% 16%;
+    --accent-foreground: 188 90% 62%;
+    --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 18% 20%;
-    --input: 200 18% 20%;
-    --ring: 190 90% 50%;
+    --border: 200 24% 18%;
+    --input: 200 24% 18%;
+    --ring: 188 90% 50%;
   }
 
+  /* ---- FOREST ---- */
   [data-theme="forest"] {
-    --background: 150 18% 7%;
-    --foreground: 150 18% 96%;
-    --card: 150 16% 11%;
-    --card-foreground: 150 18% 96%;
-    --popover: 150 16% 11%;
-    --popover-foreground: 150 18% 96%;
-    --primary: 145 70% 45%;
+    --background: 150 25% 5%;
+    --foreground: 140 20% 95%;
+    --card: 150 22% 9%;
+    --card-foreground: 140 20% 95%;
+    --popover: 150 22% 9%;
+    --popover-foreground: 140 20% 95%;
+    --primary: 142 71% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 150 14% 17%;
-    --secondary-foreground: 150 18% 84%;
-    --muted: 150 14% 14%;
-    --muted-foreground: 150 10% 58%;
-    --accent: 150 14% 17%;
-    --accent-foreground: 150 18% 96%;
-    --destructive: 4 80% 60%;
+    --secondary: 150 18% 15%;
+    --secondary-foreground: 140 15% 80%;
+    --muted: 150 18% 12%;
+    --muted-foreground: 140 10% 52%;
+    --accent: 142 40% 14%;
+    --accent-foreground: 142 71% 58%;
+    --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 150 16% 20%;
-    --input: 150 16% 20%;
-    --ring: 145 70% 45%;
+    --border: 150 20% 18%;
+    --input: 150 20% 18%;
+    --ring: 142 71% 45%;
   }
 
+  /* ---- SUNSET ---- */
   [data-theme="sunset"] {
-    --background: 18 22% 8%;
-    --foreground: 18 18% 96%;
-    --card: 18 20% 12%;
-    --card-foreground: 18 18% 96%;
-    --popover: 18 20% 12%;
-    --popover-foreground: 18 18% 96%;
-    --primary: 22 90% 58%;
+    --background: 22 30% 5%;
+    --foreground: 28 20% 96%;
+    --card: 22 26% 9%;
+    --card-foreground: 28 20% 96%;
+    --popover: 22 26% 9%;
+    --popover-foreground: 28 20% 96%;
+    --primary: 24 95% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 18 18% 18%;
-    --secondary-foreground: 18 18% 84%;
-    --muted: 18 16% 15%;
-    --muted-foreground: 18 10% 58%;
-    --accent: 18 18% 18%;
-    --accent-foreground: 18 18% 96%;
-    --destructive: 4 80% 60%;
+    --secondary: 22 22% 15%;
+    --secondary-foreground: 28 16% 80%;
+    --muted: 22 22% 12%;
+    --muted-foreground: 28 12% 52%;
+    --accent: 24 50% 14%;
+    --accent-foreground: 24 95% 70%;
+    --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 18 18% 22%;
-    --input: 18 18% 22%;
-    --ring: 22 90% 58%;
+    --border: 22 22% 20%;
+    --input: 22 22% 20%;
+    --ring: 24 95% 58%;
   }
 
+  /* =============================================
+     BASE STYLES
+     ============================================= */
   * {
     @apply border-border box-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
     line-height: 1.6;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
+    /* GPU-accelerated rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
     font-weight: 700;
     line-height: 1.2;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     @apply text-foreground;
   }
 
   a { text-decoration: none; color: inherit; }
   ul, ol { list-style: none; padding: 0; margin: 0; }
   img { max-width: 100%; display: block; }
-  
-  /* Smooth scrollbars */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { @apply bg-transparent; }
-  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/40; }
+
+  /* Premium scrollbars */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { 
+    background: hsl(var(--border));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 /* =============================================
-   GLOBAL UTILITY CLASSES 
+   UTILITIES
    ============================================= */
 @layer utilities {
+
+  /* Premium gradient text using primary color */
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(250 85% 75%));
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.65));
   }
 
-  .page-container {
-    @apply w-full max-w-5xl mx-auto;
+  /* Glassmorphism */
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.8);
   }
 
-  /* Markdown content inside chat bubbles */
+  /* Glow effects for active states */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 40px hsl(var(--primary) / 0.1);
+  }
+
+  /* ============================================
+     MARKDOWN CONTENT (AI Chat bubbles)
+     ============================================ */
+  .markdown-body { line-height: 1.7; }
   .markdown-body p { @apply mb-2 last:mb-0; }
-  .markdown-body ul, .markdown-body ol { @apply ml-5 mb-2 space-y-1; }
-  .markdown-body ul { list-style: disc; }
-  .markdown-body ol { list-style: decimal; }
-  .markdown-body pre { @apply bg-black/20 rounded-lg p-3 overflow-x-auto mb-2 text-sm; }
-  .markdown-body code { @apply font-mono text-xs bg-black/15 px-1 py-0.5 rounded; }
-  .markdown-body h1, .markdown-body h2, .markdown-body h3 { @apply font-bold mb-2 mt-3 first:mt-0; }
+  .markdown-body ul { @apply ml-4 mb-2 space-y-1; list-style: disc; }
+  .markdown-body ol { @apply ml-4 mb-2 space-y-1; list-style: decimal; }
+  .markdown-body li { @apply leading-relaxed; }
+  .markdown-body pre {
+    @apply bg-black/25 rounded-xl p-4 overflow-x-auto mb-3 text-sm leading-relaxed;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  }
+  .markdown-body code:not(pre code) {
+    @apply font-mono text-sm bg-primary/15 text-primary px-1.5 py-0.5 rounded-md;
+  }
+  .markdown-body h1 { @apply text-xl font-black mb-3 mt-4 first:mt-0; }
+  .markdown-body h2 { @apply text-lg font-bold mb-2 mt-3 first:mt-0; }
+  .markdown-body h3 { @apply text-base font-bold mb-2 mt-2 first:mt-0; }
   .markdown-body strong { @apply font-bold; }
   .markdown-body em { @apply italic; }
-  .markdown-body table { @apply w-full text-sm border-collapse mb-2; }
-  .markdown-body th, .markdown-body td { @apply border border-border/50 px-3 py-1.5 text-left; }
-  .markdown-body th { @apply bg-secondary/30 font-semibold; }
+  .markdown-body blockquote {
+    @apply border-l-4 border-primary/40 pl-4 italic text-muted-foreground mb-2;
+  }
+  .markdown-body table { @apply w-full text-sm border-collapse mb-3 rounded-lg overflow-hidden; }
+  .markdown-body th {
+    @apply bg-primary/10 text-foreground font-semibold px-3 py-2 text-left border border-border/40;
+  }
+  .markdown-body td { @apply px-3 py-2 border border-border/30; }
+  .markdown-body hr { @apply border-border/40 my-3; }
 
-  /* KaTeX math rendering fix */
-  .katex-display { @apply overflow-x-auto py-2; }
-}
-
-/* =============================================
-   ANIMATION KEYFRAMES (used by Tailwind animate-* classes)
-   ============================================= */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.3); }
-  50%       { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+  /* KaTeX math rendering */
+  .katex-display { @apply overflow-x-auto py-3 my-1; }
+  .katex { font-size: 1em !important; }
 }
 
 /* =============================================
@@ -215,23 +253,28 @@
   flex-direction: column;
   gap: 0.5rem;
   pointer-events: none;
+  max-width: min(360px, calc(100vw - 2rem));
 }
 
 .toast-item {
   pointer-events: auto;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 0.875rem;
   color: #fff;
   font-weight: 600;
   font-size: 0.875rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15);
+  animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 /* =============================================
-   HEATMAP 
+   PRIORITY HEATMAP (Home page)
    ============================================= */
 .heatmap {
   display: grid;
@@ -244,12 +287,41 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  @apply bg-secondary/30;
-  transition: transform 0.15s;
+  background: hsl(var(--secondary));
+  transition: transform 0.12s ease;
+  cursor: pointer;
 }
 
-.heat-cell:hover { transform: scale(1.3); }
-.heat-cell[data-level="1"] { background: hsl(var(--primary) / 0.25); }
-.heat-cell[data-level="2"] { background: hsl(var(--primary) / 0.45); }
-.heat-cell[data-level="3"] { background: hsl(var(--primary) / 0.65); }
+.heat-cell:hover { transform: scale(1.4); }
+.heat-cell[data-level="1"] { background: hsl(var(--primary) / 0.2); }
+.heat-cell[data-level="2"] { background: hsl(var(--primary) / 0.42); }
+.heat-cell[data-level="3"] { background: hsl(var(--primary) / 0.68); }
 .heat-cell[data-level="4"] { background: hsl(var(--primary)); }
+
+/* =============================================
+   KEYFRAME ANIMATIONS
+   ============================================= */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35); }
+  50%       { box-shadow: 0 0 0 14px hsl(var(--primary) / 0); }
+}
+
+@keyframes recordingPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.06); opacity: 0.85; }
+}
