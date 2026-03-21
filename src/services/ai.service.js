@@ -10,12 +10,19 @@ export async function askGemini(prompt, systemInstruction = '') {
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS)
 
   try {
-    let url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`
+    const messages = []
     if (systemInstruction) {
-      url += `&system=${encodeURIComponent(systemInstruction)}`
+      messages.push({ role: 'system', content: systemInstruction })
     }
+    messages.push({ role: 'user', content: prompt })
 
-    const res = await fetch(url, { signal: controller.signal })
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, model: 'openai' }),
+      signal: controller.signal
+    })
+    
     if (!res.ok) throw new Error(`Server responded with ${res.status}`)
     
     const text = await res.text()
