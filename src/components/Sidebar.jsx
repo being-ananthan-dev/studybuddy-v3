@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react'
 
 const navItems = [
   { to: '/',           icon: '🏠', label: 'Home',       end: true },
-  { to: '/ai',         icon: '🤖', label: 'AI Tutor' },
-  { to: '/planner',    icon: '📅', label: 'Planner' },
   { to: '/pomodoro',   icon: '⏱️', label: 'Focus' },
   { to: '/focusroom',  icon: '👥', label: 'Focus Room' },
   { to: '/notes',      icon: '📓', label: 'Notes' },
