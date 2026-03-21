@@ -7,31 +7,46 @@ const AI_TIMEOUT_MS = 30_000
  */
 export async function askGemini(prompt, systemInstruction = '') {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS)
+  const timeoutId = setTimeout(() => controller.abort(), 12000) // 12s timeout
 
-  const combinedPrompt = systemInstruction 
-    ? `Instructions: ${systemInstruction}\n\nTask: ${prompt}` 
-    : prompt
-
-  // PROXY CHAIN — TRY MULTIPLE FREE PROVIDERS FOR 100% UPTIME
+  // PROXY CHAIN — TRY ROBUST POST REQUESTS
   const proxies = [
-    // 1. Pollinations (Usually most reliable)
+    // 1. Pollinations — OpenAI Model (Primary)
     async () => {
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(combinedPrompt)}?model=openai-large&cache=false`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(8000)
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemInstruction || 'You are a helpful study assistant.' },
+            { role: 'user', content: prompt }
+          ],
+          model: 'searchgpt', // or 'openai' - searchgpt is often very fast
+          seed: Math.floor(Math.random() * 1000000)
+        }),
+        signal: controller.signal
       })
-      if (!res.ok) throw new Error('Pollinations failed')
-      return (await res.text()).trim()
+      if (!res.ok) throw new Error('Pollinations service error')
+      const text = await res.text()
+      return text.trim()
     },
-    // 2. Secondary Proxy (Pollinations with different model/params)
+    // 2. Pollinations — Mistral Model (Backup)
     async () => {
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(combinedPrompt)}?model=mistral&seed=${Math.floor(Math.random()*1000)}`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(8000)
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemInstruction || 'You are a helpful study assistant.' },
+            { role: 'user', content: prompt }
+          ],
+          model: 'mistral'
+        }),
+        signal: controller.signal
       })
       if (!res.ok) throw new Error('Mistral fallback failed')
-      return (await res.text()).trim()
+      const text = await res.text()
+      return text.trim()
     }
   ]
 
@@ -39,13 +54,15 @@ export async function askGemini(prompt, systemInstruction = '') {
     try {
       const result = await proxy()
       if (result) {
-        clearTimeout(timer)
+        clearTimeout(timeoutId)
         return result
       }
     } catch (e) {
-      console.warn('AI Proxy step failed, attempting next...', e.message)
+      console.warn('AI Proxy attempt failed:', e.message)
     }
   }
+
+  clearTimeout(timeoutId)
 
   // 3. OFFLINE WISDOM FALLBACK (100% Guaranteed Uptime for Chanakya Guide)
   if (systemInstruction && systemInstruction.includes('Chanakya')) {
@@ -55,13 +72,11 @@ export async function askGemini(prompt, systemInstruction = '') {
       "Niti: पुस्तकेषु च या विद्या परहस्तेषु यद्धनम्। उत्पन्नेषु च कार्येषु न सा विद्या न तद्धनम्॥\nTranslation: Knowledge residing in books and wealth residing in others' hands are of no use when the time comes to apply them.\nMeaning: You are relying too much on external notes and tutorials rather than internalizing the concepts. True mastery means the knowledge is in your head, ready to be deployed without looking at a guide.\nQuestion: Are you testing your recall, or merely passively re-reading the material?",
       "Niti: कालः पचति भूतानि कालः संहरते प्रजाः। कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time consumes all beings, time destroys all creatures. Time is awake when all are asleep; time is truly insurmountable.\nMeaning: You are facing a crisis of procrastination. Time is the only resource you cannot earn back. By delaying your work, you are surrendering your greatest strategic advantage to your competitors.\nQuestion: How many hours have you wasted today that could have been used to secure your future?"
     ]
-    clearTimeout(timer)
     return wisdoms[Math.floor(Math.random() * wisdoms.length)]
   }
 
   // 4. GENERIC STUDENT FALLBACK
-  clearTimeout(timer)
-  return "The StudyBuddy AI is taking a short breath due to high traffic! 🧘\n\nTake a 2-minute stretch break and try again. Your focus is more important than any AI response. You've got this!"
+  return "The StudyBuddy AI server is very busy! 🧘\n\nTake a quick 2-minute stretch break and try again. Your own brain is your best study buddy—you've got this!"
 }
 
 /**
