@@ -3,6 +3,8 @@ import { idbSave, idbGetAll, idbDelete } from '../services/indexeddb.service'
 import { searchNotes } from '../services/vector.service'
 import { askGemini } from '../services/ai.service'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
+import { logActivity } from '../services/user.service'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
 
@@ -21,6 +23,7 @@ export default function Notes() {
   const [isSummarizing, setIsSummarizing] = useState(false)
 
   const { addToast } = useToast()
+  const { user } = useAuth()
 
   useEffect(() => { idbGetAll('notes').then(setNotes).catch(() => {}) }, [])
 
@@ -32,6 +35,7 @@ export default function Notes() {
     if (contentToSave === input) setInput('')
     try { await idbSave('notes', note) } catch { /* ignore */ }
     addToast('Note saved!', 'success')
+    if (user?.uid) logActivity(user.uid, 'note').catch(() => {})
   }
 
   const del = async (id) => {

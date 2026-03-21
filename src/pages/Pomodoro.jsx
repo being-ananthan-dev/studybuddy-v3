@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
+import { logActivity } from '../services/user.service'
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,6 +14,7 @@ export default function Pomodoro() {
   const [mode, setMode] = useState('focus')   // 'focus' | 'break'
   const [cycles, setCycles] = useState(0)
   const { addToast } = useToast()
+  const { user } = useAuth()
 
   const timeRef  = useRef(25 * 60)
   const modeRef  = useRef('focus')
@@ -41,6 +44,7 @@ export default function Pomodoro() {
           modeRef.current = 'break'
           timeRef.current = 5 * 60
           addToast(`Cycle ${newCycles} complete! Take a break 🎉`, 'success')
+          if (user?.uid) logActivity(user.uid, 'session', 25).catch(() => {})
         } else {
           setMode('focus')
           modeRef.current = 'focus'

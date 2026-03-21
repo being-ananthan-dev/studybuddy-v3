@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { generateStudyPlan } from '../services/ai.service'
+import { useAuth } from '../context/AuthContext'
+import { logActivity } from '../services/user.service'
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 export default function Planner() {
+  const { user } = useAuth()
   const [subjects, setSubjects] = useState('')
   const [timeframe, setTimeframe] = useState('')
   const [plan, setPlan] = useState(null)
@@ -18,6 +21,7 @@ export default function Planner() {
     try {
       const p = await generateStudyPlan(subjects, timeframe)
       setPlan(p)
+      if (user?.uid) logActivity(user.uid, 'plan').catch(() => {})
     } catch { setPlan({ days: [] }) }
     finally { setLoading(false) }
   }

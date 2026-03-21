@@ -2,6 +2,8 @@ import { useState, useRef } from 'react'
 import { startSpeechRecognition, synthesizeSpeech } from '../services/speech.service'
 import { askGemini } from '../services/ai.service'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
+import { logActivity } from '../services/user.service'
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +18,7 @@ export default function OralTest() {
   const [loadingQ, setLoadingQ] = useState(false)
   const recognitionRef = useRef(null)
   const { addToast } = useToast()
+  const { user } = useAuth()
 
   const toggleRecord = () => {
     if (recording && recognitionRef.current) {
@@ -29,6 +32,7 @@ export default function OralTest() {
         const grade = await askGemini(`Evaluate this oral answer to "${question}": "${text}". Give a score out of 10 and 2-sentence feedback.`, 'You are a strict but encouraging teacher.')
         setEvaluation(grade); setTranscript(text)
         synthesizeSpeech('Voice evaluation complete.')
+        if (user?.uid) logActivity(user.uid, 'test').catch(() => {})
       } catch { addToast('Evaluation logic failed', 'error'); setTranscript(text) }
     }, (err) => { addToast(err, 'error'); setRecording(false); setTranscript('Microphone Error.') })
   }

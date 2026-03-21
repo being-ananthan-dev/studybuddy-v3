@@ -10,6 +10,7 @@ import {
   signOut
 } from 'firebase/auth'
 import { auth } from '../services/firebase.config'
+import { initUserProfile } from '../services/user.service'
 import { useToast } from './ToastContext'
 
 const AuthContext = createContext()
@@ -20,16 +21,29 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const { addToast } = useToast()
 
-  // Listen for auth state changes (fires on login/logout/page refresh)
+  // Listen for auth state changes
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser)
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser)
+        // Initialize or update user profile in database
+        try {
+          const { isNew } = await initUserProfile(firebaseUser)
+          if (isNew) {
+            addToast(`Welcome to StudyBuddy, ${firebaseUser.displayName || 'Student'}! 🎉`, 'success')
+          }
+        } catch (err) {
+          console.warn('Profile init error:', err)
+        }
+      } else {
+        setUser(null)
+      }
       setLoading(false)
     })
     return unsub
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Sign up with email + password + display name
   const signup = useCallback(async (name, email, password) => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password)
@@ -37,50 +51,42 @@ export function AuthProvider({ children }) {
         displayName: name,
         photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=128`
       })
-      // Force refresh user so displayName appears immediately
       setUser({ ...cred.user, displayName: name })
       addToast(`Welcome aboard, ${name}! 🎉`, 'success')
     } catch (err) {
-      const msg = firebaseErrorMessage(err.code)
-      addToast(msg, 'error')
+      addToast(firebaseErrorMessage(err.code), 'error')
       throw err
     }
   }, [addToast])
 
-  // Log in with email + password
   const login = useCallback(async (email, password) => {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password)
       addToast(`Welcome back, ${cred.user.displayName || 'Student'}! 👋`, 'success')
     } catch (err) {
-      const msg = firebaseErrorMessage(err.code)
-      addToast(msg, 'error')
+      addToast(firebaseErrorMessage(err.code), 'error')
       throw err
     }
   }, [addToast])
 
-  // Sign in with Google popup
   const loginWithGoogle = useCallback(async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider)
       addToast(`Welcome, ${result.user.displayName || 'Student'}! 🎉`, 'success')
     } catch (err) {
-      // User closed popup — don't show error
       if (err.code === 'auth/popup-closed-by-user') return
       if (err.code === 'auth/cancelled-popup-request') return
-      const msg = firebaseErrorMessage(err.code)
-      addToast(msg, 'error')
+      addToast(firebaseErrorMessage(err.code), 'error')
       throw err
     }
   }, [addToast])
 
-  // Log out
   const logout = useCallback(async () => {
     try {
       await signOut(auth)
       addToast('Signed out successfully.', 'info')
     } catch (err) {
-      addToast('Failed to sign out. Try again.', 'error')
+      addToast('Failed to sign out.', 'error')
       throw err
     }
   }, [addToast])
@@ -94,19 +100,19 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => useContext(AuthContext)
 
-// Map Firebase error codes to human-friendly messages
 function firebaseErrorMessage(code) {
   const map = {
-    'auth/email-already-in-use': 'This email is already registered. Try logging in instead.',
+    'auth/email-already-in-use': 'This email is already registered. Try logging in.',
     'auth/invalid-email': 'Please enter a valid email address.',
     'auth/weak-password': 'Password must be at least 6 characters.',
-    'auth/user-not-found': 'No account found with this email. Sign up first!',
-    'auth/wrong-password': 'Incorrect password. Please try again.',
-    'auth/invalid-credential': 'Invalid email or password. Please check and try again.',
-    'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
-    'auth/network-request-failed': 'Network error. Check your internet connection.',
-    'auth/popup-blocked': 'Popup was blocked by your browser. Please allow popups.',
-    'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method.',
+    'auth/user-not-found': 'No account found. Sign up first!',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/invalid-credential': 'Invalid email or password.',
+    'auth/too-many-requests': 'Too many attempts. Wait a moment.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/popup-blocked': 'Popup blocked. Please allow popups.',
+    'auth/unauthorized-domain': 'This domain is not authorized in Firebase. Add it in Firebase Console → Authentication → Settings → Authorized domains.',
+    'auth/account-exists-with-different-credential': 'Account exists with a different sign-in method.',
   }
   return map[code] || `Authentication error: ${code || 'Unknown'}`
 }

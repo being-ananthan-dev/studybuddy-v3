@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
 import { askGemini } from '../services/ai.service'
+import { useAuth } from '../context/AuthContext'
+import { logActivity } from '../services/user.service'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -10,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
 export default function AI() {
+  const { user } = useAuth()
   const [messages, setMessages] = useState([
     { role: 'ai', text: "Hello! I'm your AI tutor. Ask me anything — math, science, history, essays. How can I help? 🎓" }
   ])
@@ -27,6 +30,7 @@ export default function AI() {
     try {
       const res = await askGemini(q, "You are a helpful educational AI tutor. Be concise and encouraging.")
       setMessages(m => [...m, { role: 'ai', text: res }])
+      if (user?.uid) logActivity(user.uid, 'session', 2).catch(() => {})
     } catch {
       setMessages(m => [...m, { role: 'ai', text: "Sorry, I couldn't reach the AI." }])
     } finally {
