@@ -19,7 +19,7 @@ const SOUNDS = [
   { id: 'hbgXkSbbqI0', label: '☕ Busy Cafe', color: 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600', msg: 'Playing Busy Cafe' },
   { id: 'eKFTSSKCzWA', label: '🌲 Forest Stream', color: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600', msg: 'Playing Forest Stream' },
   { id: 'm3zvVGJrTP8', label: '🌌 Deep Space', color: 'bg-purple-600 hover:bg-purple-700 text-white border-purple-600', msg: 'Playing Deep Space' },
-  { id: '8X_iEQjA3dI', label: '🎹 La Petite Fille', color: 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600', msg: 'Playing La Petite Fille de la Mer' }
+  { id: 'bu6B37TJxFg', label: '🎹 La Petite Fille', color: 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600', msg: 'Playing La Petite Fille de la Mer' }
 ]
 
 export default function FocusRoom() {
