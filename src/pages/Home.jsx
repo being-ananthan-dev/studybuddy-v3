@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { getUserStats, getUserHeatmap, logActivity } from '../services/user.service'
 
 const features = [
@@ -63,6 +64,44 @@ export default function Home() {
   const [stats, setStats] = useState(null)
   const [heatmap, setHeatmap] = useState({})
   const [loadingStats, setLoadingStats] = useState(true)
+  const [quests, setQuests] = useState([])
+
+  const { addToast } = useToast()
+
+  // Initialize Daily Quests
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const saved = localStorage.getItem('daily_quests')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.date === today) {
+          setQuests(parsed.list)
+          return
+        }
+      } catch (e) {}
+    }
+    
+    const defaults = [
+      { id: 1, text: 'Study for 30 minutes', done: false, xp: 50 },
+      { id: 2, text: 'Review 10 Flashcards', done: false, xp: 30 },
+      { id: 3, text: "Consult Chanakya's wisdom", done: false, xp: 20 },
+    ]
+    setQuests(defaults)
+    localStorage.setItem('daily_quests', JSON.stringify({ date: today, list: defaults }))
+  }, [])
+
+  const toggleQuest = (id) => {
+    const updated = quests.map(q => q.id === id ? { ...q, done: !q.done } : q)
+    setQuests(updated)
+    localStorage.setItem('daily_quests', JSON.stringify({ date: new Date().toDateString(), list: updated }))
+    
+    const quest = updated.find(q => q.id === id)
+    if (quest.done) {
+      addToast(`Quest Completed! +${quest.xp} XP 🌟`, 'success')
+      if (user?.uid) logActivity(user.uid, 'quest_completed', quest.xp).catch(() => {})
+    }
+  }
 
   useEffect(() => {
     if (!user?.uid) return
@@ -109,6 +148,51 @@ export default function Home() {
           <p className="text-muted-foreground text-base max-w-xl leading-relaxed">{quote}</p>
         </div>
       </div>
+
+      {/* ===== DAILY QUESTS ===== */}
+      <Card className="p-5 sm:p-6 border-l-4 border-l-primary shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0 pointer-events-none group-hover:scale-110 transition-transform duration-500" />
+        <div className="relative z-10">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">🎯 Daily Quests</h2>
+              <p className="text-xs text-muted-foreground">Complete these to earn XP and rank up!</p>
+            </div>
+            <div className="text-sm font-black bg-primary/10 text-primary px-3 py-1 rounded-full">
+              {quests.filter(q => q.done).length} / {quests.length}
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-2">
+            {quests.map(quest => (
+              <label 
+                key={quest.id} 
+                className={`flex justify-between items-center p-3 rounded-lg border transition-all cursor-pointer ${
+                  quest.done ? 'bg-secondary/30 border-secondary/50 opacity-60' : 'bg-background hover:border-primary/50 hover:bg-primary/5 border-border/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                    quest.done ? 'bg-primary border-primary text-primary-foreground' : 'border-muted-foreground/40'
+                  }`}>
+                    {quest.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                  </div>
+                  <span className={`text-sm font-semibold selection:bg-transparent ${quest.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                    {quest.text}
+                  </span>
+                </div>
+                <Badge variant="secondary" className={`text-[0.65rem] ${quest.done ? 'opacity-50' : 'text-primary'}`}>+{quest.xp} XP</Badge>
+                <input 
+                  type="checkbox" 
+                  checked={quest.done} 
+                  onChange={() => toggleQuest(quest.id)} 
+                  className="hidden" 
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+      </Card>
 
       {/* ===== STATS ROW ===== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
