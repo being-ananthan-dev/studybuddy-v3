@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import Sidebar from './components/Sidebar'
+import PrivateRoute from './components/PrivateRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 
 const Home       = lazy(() => import('./pages/Home'))
@@ -15,6 +16,7 @@ const OralTest   = lazy(() => import('./pages/OralTest'))
 const Challenges = lazy(() => import('./pages/Challenges'))
 const Profile    = lazy(() => import('./pages/Profile'))
 const Settings   = lazy(() => import('./pages/Settings'))
+const Login      = lazy(() => import('./pages/Login'))
 const NotFound   = lazy(() => import('./pages/NotFound'))
 
 function Loader() {
@@ -30,7 +32,6 @@ function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      {/* Main content — offset from the fixed sidebar on lg+ screens */}
       <main className="flex-1 min-w-0 lg:ml-64 pt-16 lg:pt-0">
         <div className="h-full min-h-screen p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto lg:mx-0 xl:mx-auto">
           <ErrorBoundary>
@@ -61,7 +62,17 @@ function DashboardLayout() {
 export default function App() {
   return (
     <Suspense fallback={<Loader />}>
-      <DashboardLayout />
+      <Routes>
+        {/* Public route — Login page (no sidebar) */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected routes — wrapped in PrivateRoute + DashboardLayout */}
+        <Route path="/*" element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        } />
+      </Routes>
     </Suspense>
   )
 }
