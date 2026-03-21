@@ -16,6 +16,7 @@ const OralTest   = lazy(() => import('./pages/OralTest'))
 const Challenges = lazy(() => import('./pages/Challenges'))
 const Profile    = lazy(() => import('./pages/Profile'))
 const Settings   = lazy(() => import('./pages/Settings'))
+const Chanakya   = lazy(() => import('./pages/Chanakya'))
 const Login      = lazy(() => import('./pages/Login'))
 const NotFound   = lazy(() => import('./pages/NotFound'))
 
@@ -49,6 +50,7 @@ function DashboardLayout() {
                 <Route path="/challenges" element={<Challenges />} />
                 <Route path="/profile"    element={<Profile />} />
                 <Route path="/settings"   element={<Settings />} />
+                <Route path="/chanakya"   element={<Chanakya />} />
                 <Route path="*"           element={<NotFound />} />
               </Routes>
             </Suspense>
