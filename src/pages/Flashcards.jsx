@@ -266,7 +266,7 @@ export default function Flashcards() {
         </div>
 
         {/* 3D Flip Card Container */}
-        <div className="w-full aspect-[4/3] sm:aspect-video perspective-1000 mb-8" onClick={() => setIsFlipped(!isFlipped)}>
+        <div key={currentCardIdx} className="w-full aspect-[4/3] sm:aspect-video perspective-1000 mb-8" onClick={() => setIsFlipped(!isFlipped)}>
           <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d cursor-pointer ${isFlipped ? 'rotate-y-180' : ''}`}>
             
             {/* Front */}
