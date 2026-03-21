@@ -21,8 +21,6 @@ export default defineConfig({
   build: {
     // Increase chunk size warning limit (pdfjs + mammoth are inherently large)
     chunkSizeWarningLimit: 1000,
-    // Target standard modern browsers
-    target: "modules",
     rollupOptions: {
       output: {
         manualChunks: (id) => {
