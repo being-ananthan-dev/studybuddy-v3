@@ -1,47 +1,65 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
-  const { prompt, systemInstruction } = req.body;
-  const fullMessage = systemInstruction 
-    ? `System Instructions:\n${systemInstruction}\n\nUser Question:\n${prompt}` 
-    : prompt;
+  if (req.method === 'OPTIONS') return res.status(200).end()
+  if (req.method === 'GET') return res.status(200).json({ status: 'AI proxy running' })
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const proxies = [
-    // 1. Pollinations (Server-side POST is much more reliable)
-    async () => {
-      const response = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }],
-          model: 'openai',
-          jsonMode: false
-        })
-      });
-      if (!response.ok) throw new Error('Pollinations failed');
-      return await response.text();
-    },
-    // 2. Hercai
-    async () => {
-      const response = await fetch(`https://api.hercai.onrender.com/v3/hercai?question=${encodeURIComponent(fullMessage.slice(0, 1500))}`);
-      if (!response.ok) throw new Error('Hercai failed');
-      const json = await response.json();
-      return json.reply || json.content || '';
-    }
-  ];
+  const { prompt = '', systemInstruction = '' } = req.body || {}
+  
+  // Read key from Vercel Environment Variable (set in Vercel Dashboard)
+  const GROQ_API_KEY = process.env.GROQ_API_KEY
 
-  for (const proxy of proxies) {
+  if (GROQ_API_KEY) {
     try {
-      const result = await proxy();
-      if (result && result.length > 5 && !result.toLowerCase().includes('server down')) {
-        return res.status(200).send(result.trim());
+      const messages = []
+      if (systemInstruction) messages.push({ role: 'system', content: systemInstruction })
+      messages.push({ role: 'user', content: prompt.slice(0, 4000) })
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'llama3-8b-8192',
+          messages,
+          max_tokens: 1024,
+          temperature: 0.7
+        })
+      })
+
+      if (groqRes.ok) {
+        const data = await groqRes.json()
+        const text = data?.choices?.[0]?.message?.content
+        if (text) return res.status(200).send(text.trim())
       }
     } catch (e) {
-      console.error('Vercel Proxy Attempt Failed:', e.message);
+      console.error('Groq error:', e.message)
     }
   }
 
-  return res.status(503).send('All AI proxies are currently unavailable.');
+  // Fallback: Pollinations
+  try {
+    const fullMsg = systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt
+    const polRes = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: fullMsg.slice(0, 4000) }],
+        model: 'openai'
+      })
+    })
+    if (polRes.ok) {
+      const text = (await polRes.text()).trim()
+      if (text && text.length > 5) return res.status(200).send(text)
+    }
+  } catch (e) {
+    console.error('Pollinations error:', e.message)
+  }
+
+  return res.status(503).json({ error: 'AI temporarily unavailable' })
 }
