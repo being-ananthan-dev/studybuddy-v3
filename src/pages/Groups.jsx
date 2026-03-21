@@ -35,7 +35,7 @@ export default function Groups() {
   }
 
   return (
-    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col">
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto h-[calc(100dvh-7rem)] lg:h-[calc(100dvh-5rem)] flex flex-col">
       <div className="mb-6 shrink-0">
         <h1 className="text-3xl font-extrabold tracking-tight mb-1">Study Groups</h1>
         <p className="text-muted-foreground text-sm">Chat live with global students across platforms</p>

@@ -146,7 +146,7 @@ export default function Reminders() {
         )}
         
         {reminders.map(r => (
-          <Card key={r.id} className={`p-4 xl:p-5 flex justify-between items-center transition-all hover:shadow-md ${r.completed ? 'opacity-50 grayscale bg-secondary/20 border-r-4 border-r-transparent' : r.priority === 'High' ? 'border-l-4 border-l-destructive shadow-sm' : r.priority === 'Medium' ? 'border-l-4 border-l-primary shadow-sm' : 'border-l-4 border-l-border'}`}>
+          <Card key={r.id} className={`p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 transition-all hover:shadow-md ${r.completed ? 'opacity-50 grayscale bg-secondary/20' : r.priority === 'High' ? 'border-l-4 border-l-destructive shadow-sm' : r.priority === 'Medium' ? 'border-l-4 border-l-primary shadow-sm' : 'border-l-4 border-l-border'}`}>
             <div className="flex items-start gap-4">
               <Checkbox 
                 checked={r.completed} 
@@ -169,7 +169,7 @@ export default function Reminders() {
                 </div>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => del(r.id)} className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive shrink-0 h-8 w-8 ms-4">
+            <Button variant="ghost" size="icon" onClick={() => del(r.id)} className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive shrink-0 h-8 w-8 self-end sm:self-center">
               ✕
             </Button>
           </Card>
