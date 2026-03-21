@@ -1,6 +1,9 @@
 export function startSpeechRecognition(onResult, onError) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { onError('Speech recognition not supported'); return null }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition
+  if (!SR) { 
+    onError('Your browser does not support Speech Recognition. Please try Chrome or Edge.')
+    return null 
+  }
   const recognition = new SR()
   recognition.continuous = false
   recognition.interimResults = false

@@ -9,6 +9,7 @@ export const themesList = [
   { id: 'ocean',  icon: '🌊', label: 'Ocean' },
   { id: 'forest', icon: '🌲', label: 'Forest' },
   { id: 'sunset', icon: '🌇', label: 'Sunset' },
+  { id: 'midnight', icon: '🌌', label: 'Midnight' },
 ]
 
 // Apply theme immediately to <html> to avoid flash

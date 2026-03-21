@@ -89,6 +89,7 @@ export async function logActivity(uid, type, durationMinutes = 0) {
   const updates = {
     sessionsCount: increment(1),
     lastActiveDate: today,
+    xp: increment(type === 'quest_completed' ? durationMinutes : 10), // Default 10 XP for any activity
   }
 
   if (durationMinutes > 0) {

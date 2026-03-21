@@ -24,17 +24,24 @@ export default function OralTest() {
     if (recording && recognitionRef.current) {
       recognitionRef.current.stop(); recognitionRef.current = null; setRecording(false); return
     }
-    setTranscript('Listening for audio input...'); setEvaluation(''); setRecording(true)
+    setTranscript('Listening to your answer...'); setEvaluation(''); setRecording(true)
     recognitionRef.current = startSpeechRecognition(async (text) => {
       setRecording(false); setTranscript(text)
-      setTranscript(t => t + '\n\n⏳ Ping dispatched. Evaluating response...')
+      setTranscript(t => t + '\n\n⏳ Analyzing your response...')
       try {
         const grade = await askGemini(`Evaluate this oral answer to "${question}": "${text}". Give a score out of 10 and 2-sentence feedback.`, 'You are a strict but encouraging teacher.')
         setEvaluation(grade); setTranscript(text)
         synthesizeSpeech('Voice evaluation complete.')
-        if (user?.uid) logActivity(user.uid, 'test').catch(() => {})
-      } catch { addToast('Evaluation logic failed', 'error'); setTranscript(text) }
-    }, (err) => { addToast(err, 'error'); setRecording(false); setTranscript('Microphone Error.') })
+        if (user?.uid) logActivity(user.uid, 'oral_test_complete').catch(() => {})
+      } catch { 
+        addToast('Something went wrong with the AI evaluation. Please try again.', 'error')
+        setTranscript(text) 
+      }
+    }, (err) => { 
+      addToast(err === 'no-speech' ? 'I couldn\'t hear anything. Please try speaking louder.' : err, 'error')
+      setRecording(false)
+      setTranscript('Ready for your answer...') 
+    })
   }
 
   const newQuestion = async () => {
@@ -46,7 +53,9 @@ export default function OralTest() {
         
       const q = await askGemini(qPrompt, 'Strict academic evaluator.')
       setQuestion(q); setTranscript(''); setEvaluation(''); synthesizeSpeech(q)
-    } catch { addToast('Database fetch failed', 'error') }
+    } catch { 
+      addToast('Failed to generate a new question. Check your connection.', 'error') 
+    }
     finally { setLoadingQ(false) }
   }
 
@@ -68,7 +77,7 @@ export default function OralTest() {
             className="flex-1"
           />
           <Button onClick={newQuestion} disabled={loadingQ} className="shrink-0 w-32 shadow-sm font-semibold">
-             {loadingQ ? 'Routing...' : 'Start Test 🧠'}
+             {loadingQ ? 'Thinking...' : 'Start Test 🧠'}
           </Button>
         </div>
       </Card>
@@ -92,12 +101,12 @@ export default function OralTest() {
           className={`w-full max-w-sm mb-6 h-14 text-md font-bold transition-all shadow-md ${recording ? 'animate-pulse ring-4 ring-destructive/20 scale-105' : 'hover:scale-105'}`}
           onClick={toggleRecord} 
         >
-          {recording ? '🛑 Stop Recording & Grade' : '🎤 Initialize Microphone'}
+          {recording ? '🛑 Stop & Grade' : '🎤 Click to Answer'}
         </Button>
         <div className="w-full text-left">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 px-1">Raw Transcript</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 px-1">What I heard</p>
           <div className="p-5 bg-secondary/10 border border-border/40 rounded-xl min-h-[120px] text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap font-medium">
-            {transcript || 'Awaiting hardware audio input stream...'}
+            {transcript || 'Click the button above and start speaking...'}
           </div>
         </div>
       </Card>
@@ -106,7 +115,7 @@ export default function OralTest() {
         <Card className="p-6 border-l-4 border-l-emerald-500 shadow-md bg-emerald-500/5 animate-in slide-in-from-bottom-2 fade-in">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl drop-shadow-sm">📊</span>
-            <h3 className="text-lg font-extrabold text-foreground">AI Output Evaluation</h3>
+            <h3 className="text-lg font-extrabold text-foreground">Teacher feedback</h3>
           </div>
           <p className="text-[0.95rem] leading-loose text-foreground/90 font-medium">{evaluation}</p>
         </Card>

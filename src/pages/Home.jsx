@@ -7,13 +7,14 @@ import { useToast } from '../context/ToastContext'
 import { getUserStats, getUserHeatmap, logActivity } from '../services/user.service'
 
 const features = [
+  { to: '/chanakya',   icon: '🪔', label: 'Chanakya',    desc: 'Ancient Wisdom' },
+  { to: '/flashcards', icon: '🧠', label: 'Flashcards',  desc: 'Memory Bank' },
+  { to: '/whiteboard', icon: '🎨', label: 'Whiteboard',  desc: 'Mind Mapping' },
   { to: '/ai',         icon: '🤖', label: 'AI Tutor',    desc: 'Ask anything' },
   { to: '/planner',    icon: '📅', label: 'Planner',     desc: 'Study schedule' },
   { to: '/pomodoro',   icon: '⏱️', label: 'Pomodoro',    desc: '25/5 focus' },
   { to: '/focusroom',  icon: '👥', label: 'Focus Room',  desc: 'Study together' },
   { to: '/notes',      icon: '📓', label: 'Notes',       desc: 'Smart notes' },
-  { to: '/reminders',  icon: '🔔', label: 'Reminders',   desc: 'Set alarms' },
-  { to: '/groups',     icon: '💬', label: 'Chat',        desc: 'Study groups' },
   { to: '/oraltest',   icon: '🎤', label: 'Oral Test',   desc: 'Voice quiz' },
   { to: '/challenges', icon: '🏆', label: 'Challenges',  desc: 'Earn badges' },
 ]
@@ -139,9 +140,14 @@ export default function Home() {
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-accent/20 blur-2xl pointer-events-none" />
 
         <div className="relative">
-          <Badge variant="secondary" className="mb-4 text-xs font-bold uppercase tracking-widest px-3 py-1">
-            📚 Study Dashboard
-          </Badge>
+          <div className="flex justify-between items-start mb-4">
+            <Badge variant="secondary" className="text-xs font-bold uppercase tracking-widest px-3 py-1">
+              📚 Study Dashboard
+            </Badge>
+            <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-black">
+              ⭐ LVL {Math.floor((s.xp || 0) / 100) + 1}
+            </div>
+          </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-3">
             Welcome back, <span className="gradient-text">{displayName}!</span>
           </h1>

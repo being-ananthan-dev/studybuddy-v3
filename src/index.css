@@ -142,6 +142,29 @@
     --ring: 24 95% 58%;
   }
 
+  /* ---- MIDNIGHT ---- */
+  [data-theme="midnight"] {
+    --background: 232 47% 4%;
+    --foreground: 210 40% 98%;
+    --card: 232 47% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 232 47% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 232 20% 15%;
+    --secondary-foreground: 210 20% 80%;
+    --muted: 232 20% 12%;
+    --muted-foreground: 215 15% 55%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 262 83% 75%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 232 20% 18%;
+    --input: 232 20% 18%;
+    --ring: 217 91% 60%;
+  }
+
   /* =============================================
      BASE STYLES
      ============================================= */

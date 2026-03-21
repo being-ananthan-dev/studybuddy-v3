@@ -24,6 +24,10 @@ export default function Whiteboard() {
     const ctx = canvas.getContext('2d')
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    // Set default stroke
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
   }, [])
 
   const getCoordinates = (e) => {
@@ -53,10 +57,10 @@ export default function Whiteboard() {
     ctx.moveTo(x, y)
     
     // Setup stroke style
-    ctx.strokeStyle = color
-    ctx.lineWidth = color === '#ffffff' ? 20 : lineWidth // Eraser is thicker
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
+    ctx.strokeStyle = color
+    ctx.lineWidth = color === '#ffffff' ? lineWidth * 4 : lineWidth 
   }
 
   const draw = (e) => {

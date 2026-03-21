@@ -156,13 +156,13 @@ export default function Chanakya() {
             <Button 
               onClick={handleSend} 
               disabled={!input.trim() || isLoading}
-              className="absolute bottom-2 right-2 font-bold shadow-md bg-orange-600 hover:bg-orange-700 text-white"
+              className="absolute bottom-2 right-2 font-bold shadow-md bg-orange-600 hover:bg-orange-700 text-white transition-all active:scale-95"
             >
               Seek Wisdom
             </Button>
           </div>
           <p className="text-[0.65rem] text-center text-muted-foreground mt-2 font-medium">
-            Press <kbd className="px-1 py-0.5 bg-secondary rounded border border-border/50">Enter</kbd> to send. Uses the BYOK or Free AI endpoint.
+            Press <kbd className="px-1 py-0.5 bg-secondary rounded border border-border/50 mx-1">Enter</kbd> to send or <kbd className="px-1 py-0.5 bg-secondary rounded border border-border/50 mx-1">Shift+Enter</kbd> for new line.
           </p>
         </div>
       </Card>

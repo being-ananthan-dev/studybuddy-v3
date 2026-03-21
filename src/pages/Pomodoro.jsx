@@ -16,7 +16,10 @@ export default function Pomodoro() {
   const { addToast } = useToast()
   const { user } = useAuth()
 
-  const timeRef  = useRef(25 * 60)
+  // timeRemaining holds the exact seconds left.
+  const timeRemainingRef = useRef(25 * 60)
+  // endTimeRef holds the absolute timestamp when the timer should finish.
+  const endTimeRef = useRef(null)
   const modeRef  = useRef('focus')
   const cyclesRef = useRef(0)
   const intervalRef = useRef(null)
@@ -28,11 +31,18 @@ export default function Pomodoro() {
 
   const startTimer = () => {
     if (intervalRef.current) return
-    intervalRef.current = setInterval(() => {
-      timeRef.current -= 1
-      setDisplay(fmt(timeRef.current))
+    
+    // Set absolute end time based on current time remaining
+    endTimeRef.current = Date.now() + timeRemainingRef.current * 1000
 
-      if (timeRef.current <= 0) {
+    intervalRef.current = setInterval(() => {
+      const now = Date.now()
+      const remaining = Math.max(0, Math.round((endTimeRef.current - now) / 1000))
+      
+      timeRemainingRef.current = remaining
+      setDisplay(fmt(remaining))
+
+      if (remaining <= 0) {
         clearTimer()
         setRunning(false)
 
@@ -42,18 +52,18 @@ export default function Pomodoro() {
           cyclesRef.current = newCycles
           setMode('break')
           modeRef.current = 'break'
-          timeRef.current = 5 * 60
-          addToast(`Cycle ${newCycles} complete! Take a break 🎉`, 'success')
+          timeRemainingRef.current = 5 * 60
+          addToast(`Session ${newCycles} complete! Take a break 🎉`, 'success')
           if (user?.uid) logActivity(user.uid, 'session', 25).catch(() => {})
         } else {
           setMode('focus')
           modeRef.current = 'focus'
-          timeRef.current = 25 * 60
-          addToast('Break over! Ready for another round? 💪', 'info')
+          timeRemainingRef.current = 25 * 60
+          addToast('Break over! Ready for the next session? 💪', 'info')
         }
-        setDisplay(fmt(timeRef.current))
+        setDisplay(fmt(timeRemainingRef.current))
       }
-    }, 1000)
+    }, 500)
   }
 
   const toggleRun = () => {
@@ -64,7 +74,7 @@ export default function Pomodoro() {
   const reset = () => {
     clearTimer(); setRunning(false)
     setMode('focus'); modeRef.current = 'focus'
-    timeRef.current = 25 * 60
+    timeRemainingRef.current = 25 * 60
     setDisplay('25:00')
   }
 
@@ -77,7 +87,7 @@ export default function Pomodoro() {
     <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto text-center">
       <div className="mb-10">
         <h1 className="text-3xl font-extrabold tracking-tight mb-2">Pomodoro Timer</h1>
-        <p className="text-muted-foreground text-sm">Stay focused with algorithmic 25/5 minute cycles</p>
+        <p className="text-muted-foreground text-sm">Stay focused with standard 25/5 minute sessions</p>
       </div>
 
       <Card className="p-10 border-border/50 shadow-sm flex flex-col items-center">

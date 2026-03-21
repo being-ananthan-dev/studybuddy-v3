@@ -15,7 +15,11 @@ export default function FocusRoom() {
   const [display, setDisplay] = useState('45:00')
   const [running, setRunning] = useState(false)
   const [activeSound, setActiveSound] = useState(null)
-  const timeRef = useRef(45 * 60)
+  
+  // timeRemaining holds the exact seconds left.
+  const timeRemainingRef = useRef(45 * 60)
+  // endTimeRef holds the absolute timestamp when the timer should finish.
+  const endTimeRef = useRef(null)
   const intervalRef = useRef(null)
   const { addToast } = useToast()
 
@@ -23,24 +27,43 @@ export default function FocusRoom() {
 
   const startTimer = () => {
     if (intervalRef.current) return
+    
+    // Set absolute end time based on current time remaining
+    endTimeRef.current = Date.now() + timeRemainingRef.current * 1000
+
     intervalRef.current = setInterval(() => {
-      timeRef.current -= 1
-      setDisplay(fmt(timeRef.current))
-      if (timeRef.current <= 0) {
-        clearTimer(); setRunning(false)
+      const now = Date.now()
+      const remaining = Math.max(0, Math.round((endTimeRef.current - now) / 1000))
+      
+      timeRemainingRef.current = remaining
+      setDisplay(fmt(remaining))
+      
+      if (remaining <= 0) {
+        clearTimer()
+        setRunning(false)
         addToast('Focus session complete! 🎉', 'success')
-        timeRef.current = 45 * 60
+        timeRemainingRef.current = 45 * 60
         setDisplay('45:00')
       }
-    }, 1000)
+    }, 500) // check twice a second for UI responsiveness
   }
 
   const toggleRun = () => {
-    if (running) { clearTimer(); setRunning(false) }
-    else { startTimer(); setRunning(true) }
+    if (running) { 
+      clearTimer()
+      setRunning(false) 
+    } else { 
+      startTimer()
+      setRunning(true) 
+    }
   }
 
-  const reset = () => { clearTimer(); setRunning(false); timeRef.current = 45 * 60; setDisplay('45:00') }
+  const reset = () => { 
+    clearTimer()
+    setRunning(false)
+    timeRemainingRef.current = 45 * 60
+    setDisplay('45:00') 
+  }
 
   useEffect(() => () => clearTimer(), [])
 

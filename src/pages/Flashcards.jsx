@@ -188,17 +188,27 @@ export default function Flashcards() {
         {decks.map(deck => {
           const deckCards = cards.filter(c => c.deckId === deck.id)
           const dueCount = deckCards.filter(c => c.nextReview <= Date.now()).length
+          const totalCount = deckCards.length
           
           return (
             <Card key={deck.id} className="p-5 flex flex-col gap-4 border-border/50 hover:border-primary/50 transition-colors group cursor-pointer" onClick={() => { setActiveDeck(deck); setView('deck') }}>
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{deck.name}</h3>
-                <Badge variant={dueCount > 0 ? "default" : "secondary"} className="shrink-0">{dueCount} Due</Badge>
+                <Badge variant={dueCount > 0 ? "default" : "secondary"} className="shrink-0">
+                  {dueCount > 0 ? `${dueCount} Due` : 'All caught up'}
+                </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-auto">{deckCards.length} total cards</p>
+              <p className="text-xs text-muted-foreground mt-auto">{totalCount} total {totalCount === 1 ? 'card' : 'cards'}</p>
               <div className="flex gap-2 mt-2" onClick={e => e.stopPropagation()}>
-                <Button className="flex-1" size="sm" onClick={() => startStudy(deck)} disabled={dueCount === 0}>Study Now</Button>
-                <Button variant="ghost" size="sm" onClick={() => deleteDeck(deck.id)} className="text-destructive hover:bg-destructive/10">✕</Button>
+                <Button 
+                  className="flex-1 font-bold" 
+                  size="sm" 
+                  onClick={() => startStudy(deck)} 
+                  disabled={dueCount === 0}
+                >
+                  {dueCount > 0 ? 'Study Now' : 'Nothing Due'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => deleteDeck(deck.id)} className="text-destructive hover:bg-destructive/10 px-2 shrink-0">✕</Button>
               </div>
             </Card>
           )
