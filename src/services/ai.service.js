@@ -96,3 +96,52 @@ export async function askGemini(prompt, systemInstruction = '') {
   return "The StudyBuddy AI server is taking a deep breath! 🧘\n\nTake a quick stretch break and try again. Yourown determination is more powerful than any AI. You've got this!"
 }
 
+/**
+ * Generate a structured study plan for given subjects and timeframe.
+ */
+export const generateStudyPlan = async (subjects, timeframe) => {
+  const isHours = /hour/i.test(timeframe)
+  const isDays = /day/i.test(timeframe)
+  
+  const prompt = `Create an optimized study plan for ${subjects} over ${timeframe}. 
+Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
+
+  let raw = ''
+  try {
+    raw = await askGemini(prompt, 'You are an academic planner. Return only valid minified JSON.')
+    
+    const cleaned = raw
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .replace(/^\s*[\r\n]+/gm, '')
+      .trim()
+    
+    const jsonStart = cleaned.indexOf('{')
+    const jsonEnd = cleaned.lastIndexOf('}')
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      return JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1))
+    }
+    throw new Error('No JSON found')
+  } catch {
+    // SMART-MOCK FALLBACK
+    const subList = subjects.split(',').map(s => s.trim())
+    const plan = { days: [] }
+    if (isHours || (!isDays && parseInt(timeframe) < 12)) {
+      const hours = Math.min(parseInt(timeframe) || 4, 12)
+      const tasks = []
+      for (let i = 0; i < hours; i++) {
+        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${subList[i % subList.length]}`)
+      }
+      plan.days.push({ day: 'Intensive Session', tasks })
+    } else {
+      const totalDays = Math.min(parseInt(timeframe) || 7, 30)
+      for (let i = 0; i < totalDays; i++) {
+        plan.days.push({
+          day: `Day ${i + 1}`,
+          tasks: [`Mastery: ${subList[i % subList.length]}`, 'Active Recall', 'Practice Exam']
+        })
+      }
+    }
+    return plan
+  }
+}

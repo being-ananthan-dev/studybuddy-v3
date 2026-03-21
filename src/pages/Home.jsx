@@ -10,6 +10,8 @@ const features = [
   { to: '/chanakya',   icon: '🪔', label: 'Chanakya',    desc: 'Ancient Wisdom' },
   { to: '/flashcards', icon: '🧠', label: 'Flashcards',  desc: 'Memory Bank' },
   { to: '/whiteboard', icon: '🎨', label: 'Whiteboard',  desc: 'Mind Mapping' },
+  { to: '/ai',         icon: '🤖', label: 'AI Tutor',    desc: 'Ask anything' },
+  { to: '/planner',    icon: '📅', label: 'Planner',     desc: 'Study schedule' },
   { to: '/pomodoro',   icon: '⏱️', label: 'Pomodoro',    desc: '25/5 focus' },
   { to: '/focusroom',  icon: '👥', label: 'Focus Room',  desc: 'Study together' },
   { to: '/notes',      icon: '📓', label: 'Notes',       desc: 'Smart notes' },
