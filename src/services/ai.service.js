@@ -7,7 +7,7 @@ const AI_TIMEOUT_MS = 30_000
  */
 export async function askGemini(prompt, systemInstruction = '') {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 18000) // 18s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 20000) // 20s timeout for single requests
 
   // Merge system instruction into prompt for maximum compatibility with free proxies
   const fullMessage = systemInstruction 
@@ -18,26 +18,26 @@ export async function askGemini(prompt, systemInstruction = '') {
   const proxies = [
     // 1. Pollinations (GET - Best CORS compatibility)
     async () => {
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullMessage.slice(0, 1500))}?model=openai&cache=false&seed=${Date.now()}`, {
+      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullMessage.slice(0, 1200))}?model=openai&cache=false&seed=${Date.now()}`, {
         method: 'GET',
         signal: controller.signal
       })
       if (!res.ok) throw new Error('Pollinations GET failed')
       return (await res.text()).trim()
     },
-    // 2. Airforce — Fast Secondary Proxy
+    // 2. OllamaFreeAPI (New Alternative to Airforce)
     async () => {
-      const res = await fetch('https://api.airforce/v1/chat/completions', {
+      const res = await fetch('https://ollama.fynal.net/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          model: 'llama3.1:latest',
           messages: [{ role: 'user', content: fullMessage.slice(0, 3000) }],
-          model: 'llama-3-70b-instruct',
           stream: false
         }),
         signal: controller.signal
       })
-      if (!res.ok) throw new Error('Airforce failed')
+      if (!res.ok) throw new Error('OllamaFreeAPI failed')
       const json = await res.json()
       return json.choices[0].message.content || ''
     },
@@ -51,13 +51,14 @@ export async function askGemini(prompt, systemInstruction = '') {
       const json = await res.json()
       return json.reply || json.content || ''
     },
-    // 4. Pollinations (POST - Backup)
+    // 4. Pollinations (POST)
     async () => {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }]
+          messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }],
+          model: 'mistral'
         }),
         signal: controller.signal
       })
@@ -70,7 +71,11 @@ export async function askGemini(prompt, systemInstruction = '') {
     try {
       const result = await proxy()
       // Basic check for error strings in successful responses
-      if (result && !result.toLowerCase().includes('service unavailable') && !result.toLowerCase().includes('internal server error') && result.length > 5) {
+      if (result && 
+          !result.toLowerCase().includes('service unavailable') && 
+          !result.toLowerCase().includes('internal server error') && 
+          !result.toLowerCase().includes('server down') &&
+          result.length > 5) {
         clearTimeout(timeoutId)
         return result
       }
@@ -98,8 +103,6 @@ export async function askGemini(prompt, systemInstruction = '') {
 
 /**
  * Generate a structured study plan for given subjects and timeframe.
- * This function has an internal 'Smart-Mock' fallback that ensures 
- * a logically sound plan is returned even if the AI is offline.
  */
 export const generateStudyPlan = async (subjects, timeframe) => {
   const isHours = /hour/i.test(timeframe)
@@ -126,33 +129,31 @@ Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
     }
     throw new Error('No JSON found')
   } catch {
-    // SMART-MOCK FALLBACK: Generates a high-quality deterministic plan
+    // SMART-MOCK FALLBACK
     const subList = subjects.split(',').map(s => s.trim())
     const plan = { days: [] }
 
     if (isHours || (!isDays && parseInt(timeframe) < 12)) {
-      // Hourly logic (1-day plan)
       const hours = Math.min(parseInt(timeframe) || 4, 12)
       const tasks = []
       for (let i = 0; i < hours; i++) {
         const sub = subList[i % subList.length]
-        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${sub} (Concept Recall)`)
-        if (i%2 === 0) tasks.push(`Break: Refresh & Hydrate (10 mins)`)
+        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${sub}`)
+        if (i%2 === 0) tasks.push(`Short Break: 10 mins`)
       }
-      tasks.push('Final Review & Recap')
+      tasks.push('Final Review')
       plan.days.push({ day: 'Intensive Session', tasks })
     } else {
-      // Daily logic
       const totalDays = Math.min(parseInt(timeframe) || 7, 30)
       for (let i = 0; i < totalDays; i++) {
         const sub = subList[i % subList.length]
         plan.days.push({
           day: `Day ${i + 1}`,
           tasks: [
-            `Core Focus: ${sub} — Mastery of Section ${i + 1}`,
-            `Practice Session: 5 Hard Problems on ${sub}`,
-            'Active Recall: Explain concept without notes',
-            'Evening: Summary Flashcards creation'
+            `Study ${sub} — Mastery Phase ${i + 1}`,
+            `Practice Exam Problems for ${sub}`,
+            'Active Recall Session',
+            'Evening Prep'
           ]
         })
       }
