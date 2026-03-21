@@ -11,14 +11,23 @@ const ONLINE_COUNT = Math.floor(Math.random() * 20) + 5
 const AVATARS = ['A', 'B', 'C', 'D', 'E']
 const AVATAR_COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-emerald-500', 'bg-pink-500']
 
+// Extended ambient soundscapes
+const SOUNDS = [
+  { id: null, label: '🔇 Silent', color: '', msg: 'Audio muted' },
+  { id: 'jfKfPfyJRdk', label: '📻 Lofi Beats', color: 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600', msg: 'Playing Lofi Beats' },
+  { id: 'mPZkdNFkNps', label: '🌧️ Heavy Rain', color: 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600', msg: 'Playing Heavy Rain' },
+  { id: 'hbgXkSbbqI0', label: '☕ Busy Cafe', color: 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600', msg: 'Playing Busy Cafe' },
+  { id: 'eKFTSSKCzWA', label: '🌲 Forest Stream', color: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600', msg: 'Playing Forest Stream' },
+  { id: 'm3zvVGJrTP8', label: '🌌 Deep Space', color: 'bg-purple-600 hover:bg-purple-700 text-white border-purple-600', msg: 'Playing Deep Space' },
+  { id: '8X_iEQjA3dI', label: '🎹 La Petite Fille', color: 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600', msg: 'Playing La Petite Fille de la Mer' }
+]
+
 export default function FocusRoom() {
   const [display, setDisplay] = useState('45:00')
   const [running, setRunning] = useState(false)
   const [activeSound, setActiveSound] = useState(null)
   
-  // timeRemaining holds the exact seconds left.
   const timeRemainingRef = useRef(45 * 60)
-  // endTimeRef holds the absolute timestamp when the timer should finish.
   const endTimeRef = useRef(null)
   const intervalRef = useRef(null)
   const { addToast } = useToast()
@@ -28,7 +37,6 @@ export default function FocusRoom() {
   const startTimer = () => {
     if (intervalRef.current) return
     
-    // Set absolute end time based on current time remaining
     endTimeRef.current = Date.now() + timeRemainingRef.current * 1000
 
     intervalRef.current = setInterval(() => {
@@ -45,7 +53,7 @@ export default function FocusRoom() {
         timeRemainingRef.current = 45 * 60
         setDisplay('45:00')
       }
-    }, 500) // check twice a second for UI responsiveness
+    }, 500)
   }
 
   const toggleRun = () => {
@@ -68,7 +76,7 @@ export default function FocusRoom() {
   useEffect(() => () => clearTimer(), [])
 
   return (
-    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-3xl mx-auto text-center">
+    <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-3xl mx-auto text-center pb-8">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight mb-2">Live Focus Room</h1>
         <p className="text-muted-foreground text-sm">Study silently together for global accountability</p>
@@ -121,39 +129,18 @@ export default function FocusRoom() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[100px] z-0 pointer-events-none group-hover:scale-110 transition-transform duration-500" />
         <div className="relative z-10">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><span>🎧</span> Ambient Soundscapes</h3>
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              variant={activeSound === null ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => { setActiveSound(null); addToast('Audio muted', 'info') }}
-              className="font-semibold shadow-sm"
-            >
-              🔇 Silent
-            </Button>
-            <Button 
-              variant={activeSound === 'jfKfPfyJRdk' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => { setActiveSound('jfKfPfyJRdk'); addToast('Playing Lofi Beats', 'success') }}
-              className={`font-semibold shadow-sm ${activeSound === 'jfKfPfyJRdk' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : ''}`}
-            >
-              📻 Lofi Beats
-            </Button>
-            <Button 
-              variant={activeSound === 'mPZkdNFkNps' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => { setActiveSound('mPZkdNFkNps'); addToast('Playing Heavy Rain', 'success') }}
-              className={`font-semibold shadow-sm ${activeSound === 'mPZkdNFkNps' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
-            >
-              🌧️ Heavy Rain
-            </Button>
-            <Button 
-              variant={activeSound === 'hbgXkSbbqI0' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => { setActiveSound('hbgXkSbbqI0'); addToast('Playing Busy Cafe', 'success') }}
-              className={`font-semibold shadow-sm ${activeSound === 'hbgXkSbbqI0' ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
-            >
-              ☕ Busy Cafe
-            </Button>
+          <div className="flex flex-wrap gap-2.5">
+            {SOUNDS.map(s => (
+              <Button 
+                key={s.id || 'mute'}
+                variant={activeSound === s.id ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => { setActiveSound(s.id); addToast(s.msg, s.id ? 'success' : 'info') }}
+                className={`font-semibold shadow-sm transition-all duration-300 ${activeSound === s.id ? s.color : ''}`}
+              >
+                {s.label}
+              </Button>
+            ))}
           </div>
 
           {/* Invisible YouTube Player */}
