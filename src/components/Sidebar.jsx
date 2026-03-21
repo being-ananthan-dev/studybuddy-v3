@@ -14,6 +14,7 @@ const navItems = [
   { to: '/groups',     icon: '💬', label: 'Chat' },
   { to: '/oraltest',   icon: '🎤', label: 'Oral Test' },
   { to: '/challenges', icon: '🏆', label: 'Challenges' },
+  { to: '/flashcards', icon: '🗂️', label: 'Flashcards' },
   { to: '/chanakya',   icon: '🪔', label: 'Chanakya Guide' },
   { to: '/profile',    icon: '👤', label: 'Profile' },
   { to: '/settings',   icon: '⚙️', label: 'Settings' },
