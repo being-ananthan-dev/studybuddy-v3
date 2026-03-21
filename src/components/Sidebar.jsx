@@ -13,6 +13,7 @@ const navItems = [
   { to: '/reminders',  icon: '🔔', label: 'Reminders' },
   { to: '/groups',     icon: '💬', label: 'Chat' },
   { to: '/oraltest',   icon: '🎤', label: 'Oral Test' },
+  { to: '/whiteboard', icon: '🎨', label: 'Whiteboard' },
   { to: '/challenges', icon: '🏆', label: 'Challenges' },
   { to: '/flashcards', icon: '🗂️', label: 'Flashcards' },
   { to: '/chanakya',   icon: '🪔', label: 'Chanakya Guide' },

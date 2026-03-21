@@ -14,6 +14,7 @@ const AVATAR_COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-emera
 export default function FocusRoom() {
   const [display, setDisplay] = useState('45:00')
   const [running, setRunning] = useState(false)
+  const [activeSound, setActiveSound] = useState(null)
   const timeRef = useRef(45 * 60)
   const intervalRef = useRef(null)
   const { addToast } = useToast()
@@ -89,6 +90,60 @@ export default function FocusRoom() {
           <Button variant="outline" size="lg" className="px-6 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 border-border/60" onClick={reset}>
             Reset
           </Button>
+        </div>
+      </Card>
+
+      {/* AMBIENT SOUNDSCAPES */}
+      <Card className="p-6 mb-6 text-left border-border/50 shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-[100px] z-0 pointer-events-none group-hover:scale-110 transition-transform duration-500" />
+        <div className="relative z-10">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><span>🎧</span> Ambient Soundscapes</h3>
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              variant={activeSound === null ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => { setActiveSound(null); addToast('Audio muted', 'info') }}
+              className="font-semibold shadow-sm"
+            >
+              🔇 Silent
+            </Button>
+            <Button 
+              variant={activeSound === 'jfKfPfyJRdk' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => { setActiveSound('jfKfPfyJRdk'); addToast('Playing Lofi Beats', 'success') }}
+              className={`font-semibold shadow-sm ${activeSound === 'jfKfPfyJRdk' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : ''}`}
+            >
+              📻 Lofi Beats
+            </Button>
+            <Button 
+              variant={activeSound === 'mPZkdNFkNps' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => { setActiveSound('mPZkdNFkNps'); addToast('Playing Heavy Rain', 'success') }}
+              className={`font-semibold shadow-sm ${activeSound === 'mPZkdNFkNps' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+            >
+              🌧️ Heavy Rain
+            </Button>
+            <Button 
+              variant={activeSound === 'hbgXkSbbqI0' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => { setActiveSound('hbgXkSbbqI0'); addToast('Playing Busy Cafe', 'success') }}
+              className={`font-semibold shadow-sm ${activeSound === 'hbgXkSbbqI0' ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
+            >
+              ☕ Busy Cafe
+            </Button>
+          </div>
+
+          {/* Invisible YouTube Player */}
+          {activeSound && (
+            <iframe
+              width="0"
+              height="0"
+              src={`https://www.youtube.com/embed/${activeSound}?autoplay=1&loop=1&playlist=${activeSound}`}
+              title="Ambient Audio"
+              allow="autoplay"
+              className="absolute pointer-events-none opacity-0"
+            />
+          )}
         </div>
       </Card>
 
