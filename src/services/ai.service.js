@@ -10,6 +10,30 @@ export async function askGemini(prompt, systemInstruction = '') {
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS)
 
   try {
+    const apiKey = localStorage.getItem('gemini_api_key')
+    
+    // 1. IF USER PROVIDED THEIR OWN KEY — USE OFFICIAL GEMINI API (100% RELIABLE)
+    if (apiKey) {
+      const fullPrompt = systemInstruction ? `System Instructions:\n${systemInstruction}\n\nUser Request:\n${prompt}` : prompt
+      
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] }),
+        signal: controller.signal
+      })
+      
+      if (!res.ok) {
+        if (res.status === 400 || res.status === 403) throw new Error('Invalid Gemini API Key or API not enabled on your Google Cloud project.')
+        throw new Error(`Gemini API responded with ${res.status}`)
+      }
+      
+      const json = await res.json()
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text
+      return text?.trim() || 'No response received.'
+    }
+
+    // 2. FALLBACK — FREE PUBLIC ENDPOINT (OFTEN OVERLOADED)
     const messages = []
     if (systemInstruction) {
       messages.push({ role: 'system', content: systemInstruction })
@@ -23,7 +47,7 @@ export async function askGemini(prompt, systemInstruction = '') {
       signal: controller.signal
     })
     
-    if (!res.ok) throw new Error(`Server responded with ${res.status}`)
+    if (!res.ok) throw new Error(`Free AI Server responded with ${res.status}. Please set your own API key in Settings.`)
     
     const text = await res.text()
     return text?.trim() || 'No response received.'
@@ -32,7 +56,10 @@ export async function askGemini(prompt, systemInstruction = '') {
       return '⏱️ Request timed out. The AI service may be busy — please try again.'
     }
     console.warn('AI API error:', err.message)
-    return `❌ Could not reach the AI service. Check your internet connection and try again.`
+    if (err.message.includes('API Key') || err.message.includes('Free AI Server')) {
+      return `❌ ${err.message}`
+    }
+    return `❌ Could not reach the AI service. The free server might be overloaded. Please go to Settings and enter your own Gemini API key for zero errors.`
   } finally {
     clearTimeout(timer)
   }

@@ -11,12 +11,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 export default function Settings() {
   const { theme, setSpecificTheme, themesList } = useTheme()
   const { addToast } = useToast()
   const [mood, setMood] = useState('neutral')
   const [age, setAge] = useState(() => localStorage.getItem('sb_age') || 'college')
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '')
+
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem('gemini_api_key', apiKey.trim())
+      addToast('Gemini API Key saved locally! 🚀', 'success')
+    } else {
+      localStorage.removeItem('gemini_api_key')
+      addToast('API Key removed. Using free fallback.', 'info')
+    }
+  }
 
   const moods = [
     { id: 'neutral', icon: '😊' },
@@ -60,6 +73,30 @@ export default function Settings() {
                 <div className="text-xs uppercase tracking-widest font-black shrink-0">{t.label}</div>
               </Button>
             ))}
+          </div>
+        </Card>
+
+        {/* Bring Your Own API Key Card (Crucial for 0-errors) */}
+        <Card className="p-6 border-l-4 border-l-blue-500 shadow-sm flex flex-col gap-4 bg-card relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] z-0 pointer-events-none"></div>
+          <div className="relative z-10">
+            <h3 className="text-lg font-bold mb-1 flex items-center gap-2 text-foreground"><span>🔑</span> Bring Your Own AI Key <Badge variant="secondary" className="ml-2 text-[0.6rem]">RECOMMENDED</Badge></h3>
+            <p className="text-xs text-muted-foreground mb-4 leading-relaxed max-w-xl">
+              Free public AI servers (like Pollinations) are often overloaded and fail on large documents. 
+              Get your own <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline font-semibold">Free Google Gemini API Key</a> for 100% reliable, zero-error AI summarization. Your key is saved locally in your browser.
+            </p>
+            <div className="flex gap-2 max-w-md">
+              <Input 
+                type="password" 
+                placeholder="AIzaSy..." 
+                value={apiKey} 
+                onChange={e => setApiKey(e.target.value)}
+                className="font-mono text-sm shadow-inner bg-background/50 border-border/60"
+              />
+              <Button onClick={saveApiKey} variant="default" className="font-semibold shadow-sm shrink-0">
+                Save Key
+              </Button>
+            </div>
           </div>
         </Card>
 
