@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 export default defineConfig({
+  base: './',
   plugins: [
     react({
       // Enable fast refresh with SWC-like optimizations
@@ -20,8 +21,8 @@ export default defineConfig({
   build: {
     // Increase chunk size warning limit (pdfjs + mammoth are inherently large)
     chunkSizeWarningLimit: 1000,
-    // Target modern browsers for smaller output
-    target: "esnext",
+    // Target standard modern browsers
+    target: "modules",
     rollupOptions: {
       output: {
         manualChunks: (id) => {
