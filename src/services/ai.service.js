@@ -1,5 +1,5 @@
 // AI service — uses keyless free public endpoint so no API keys needed
-const AI_TIMEOUT_MS = 30_000
+const AI_TIMEOUT_MS = 25_000
 
 /**
  * Ask the AI a question with system instruction.
@@ -7,21 +7,23 @@ const AI_TIMEOUT_MS = 30_000
  */
 export async function askGemini(prompt, systemInstruction = '') {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 12000) // 12s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
+
+  // Merge system instruction into prompt for maximum compatibility with free proxies
+  const fullMessage = systemInstruction 
+    ? `System Instructions:\n${systemInstruction}\n\nUser Question:\n${prompt}` 
+    : prompt
 
   // PROXY CHAIN — TRY ROBUST POST REQUESTS
   const proxies = [
-    // 1. Pollinations — OpenAI Model (Primary)
+    // 1. Pollinations — Standard OpenAI (Primary)
     async () => {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemInstruction || 'You are a helpful study assistant.' },
-            { role: 'user', content: prompt }
-          ],
-          model: 'searchgpt', // or 'openai' - searchgpt is often very fast
+          messages: [{ role: 'user', content: fullMessage }],
+          model: 'openai',
           seed: Math.floor(Math.random() * 1000000)
         }),
         signal: controller.signal
@@ -36,10 +38,7 @@ export async function askGemini(prompt, systemInstruction = '') {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemInstruction || 'You are a helpful study assistant.' },
-            { role: 'user', content: prompt }
-          ],
+          messages: [{ role: 'user', content: fullMessage }],
           model: 'mistral'
         }),
         signal: controller.signal
@@ -76,7 +75,7 @@ export async function askGemini(prompt, systemInstruction = '') {
   }
 
   // 4. GENERIC STUDENT FALLBACK
-  return "The StudyBuddy AI server is very busy! 🧘\n\nTake a quick 2-minute stretch break and try again. Your own brain is your best study buddy—you've got this!"
+  return "The StudyBuddy AI server is very busy! 🧘\n\nTake a quick 2-minute stretch break and try again. Your brain is a powerhouse—you can solve this!"
 }
 
 /**
