@@ -144,7 +144,15 @@ export default function Flashcards() {
     
     setIsFlipped(false)
     
-    if (currentCardIdx + 1 < studyQueue.length) {
+    // Crucial SRS fix: If they hit 'Hard', they must see it again this session.
+    let nextQueue = [...studyQueue]
+    if (quality === 0) {
+      nextQueue.push(updatedCard)
+      setStudyQueue(nextQueue)
+      addToast('Card marked Hard. You will see it again soon.', 'info')
+    }
+    
+    if (currentCardIdx + 1 < nextQueue.length) {
       setCurrentCardIdx(currentCardIdx + 1)
     } else {
       setView('home')

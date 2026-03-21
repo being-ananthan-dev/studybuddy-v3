@@ -34,16 +34,10 @@ export async function askGemini(prompt, systemInstruction = '') {
     }
 
     // 2. FALLBACK — FREE PUBLIC ENDPOINT (OFTEN OVERLOADED)
-    const messages = []
-    if (systemInstruction) {
-      messages.push({ role: 'system', content: systemInstruction })
-    }
-    messages.push({ role: 'user', content: prompt })
+    const combinedPrompt = systemInstruction ? `System Instructions:\n${systemInstruction}\n\nUser Request:\n${prompt}` : prompt
 
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, model: 'openai' }),
+    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(combinedPrompt)}?model=openai`, {
+      method: 'GET',
       signal: controller.signal
     })
     
