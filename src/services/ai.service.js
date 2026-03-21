@@ -14,45 +14,48 @@ export async function askGemini(prompt, systemInstruction = '') {
     ? `System Instructions:\n${systemInstruction}\n\nUser Question:\n${prompt}` 
     : prompt
 
-  // PROXY CHAIN — TRY ROBUST POST REQUESTS
+  // PROXY CHAIN — TRY ROBUST METHODS
   const proxies = [
-    // 1. Pollinations — Standard OpenAI (Primary)
+    // 1. Pollinations (GET - Best CORS compatibility)
     async () => {
-      const res = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: fullMessage }],
-          model: 'openai',
-          seed: Math.floor(Math.random() * 1000000)
-        }),
+      // Browsers handle GET much better for cross-origin requests
+      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullMessage.slice(0, 1500))}?model=openai&cache=false&seed=${Date.now()}`, {
+        method: 'GET',
         signal: controller.signal
       })
-      if (!res.ok) throw new Error('Pollinations service error')
-      const text = await res.text()
-      return text.trim()
+      if (!res.ok) throw new Error('Pollinations GET failed')
+      return (await res.text()).trim()
     },
-    // 2. Pollinations — Mistral Model (Backup)
+    // 2. Hercai — Reliable Backup Proxy (GET)
+    async () => {
+      const res = await fetch(`https://api.hercai.onrender.com/v3/hercai?question=${encodeURIComponent(fullMessage.slice(0, 1500))}`, {
+        method: 'GET',
+        signal: controller.signal
+      })
+      if (!res.ok) throw new Error('Hercai failed')
+      const json = await res.json()
+      return json.reply || json.content || ''
+    },
+    // 3. Pollinations (POST - No model specified, matching user's test script)
     async () => {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: fullMessage }],
-          model: 'mistral'
+          messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }]
+          // OMITTING 'model' key as per user's find
         }),
         signal: controller.signal
       })
-      if (!res.ok) throw new Error('Mistral fallback failed')
-      const text = await res.text()
-      return text.trim()
+      if (!res.ok) throw new Error('Pollinations POST failed')
+      return (await res.text()).trim()
     }
   ]
 
   for (const proxy of proxies) {
     try {
       const result = await proxy()
-      if (result) {
+      if (result && !result.includes('Service Unavailable') && !result.includes('Internal Server Error')) {
         clearTimeout(timeoutId)
         return result
       }
@@ -69,13 +72,13 @@ export async function askGemini(prompt, systemInstruction = '') {
       "Niti: अज्ञानतिमिरान्धस्य ज्ञानाञ्जनाशलाकया। चक्षुरुन्मीलितं येन तस्मै श्रीगुरवे नमः॥\nTranslation: Salutations to the teacher who removes the darkness of ignorance with the light of knowledge.\nMeaning: You are feeling lost because you lack the specific knowledge for this obstacle. Do not despair; seek a mentor, a book, or a new perspective. The problem is not your capability, but your current visibility.\nQuestion: Where can you find the exact piece of knowledge you are missing today?",
       "Niti: उद्योगे नास्ति दारिद्र्यं जपतो नास्ति पातकम्। मौने च कलहो नास्ति नास्ति जागरिते भयम्॥\nTranslation: Through effort there is no poverty; through meditation there is no sin. In silence there is no quarrel; in wakefulness there is no fear.\nMeaning: Your anxiety stems from inaction. When you are deeply engaged in effort (Udyoga), the mind has no time for fear or doubt. The solution to your academic challenge is sheer, focused execution.\nQuestion: What is one small action you can take right now to break this paralysis?",
       "Niti: पुस्तकेषु च या विद्या परहस्तेषु यद्धनम्। उत्पन्नेषु च कार्येषु न सा विद्या न तद्धनम्॥\nTranslation: Knowledge residing in books and wealth residing in others' hands are of no use when the time comes to apply them.\nMeaning: You are relying too much on external notes and tutorials rather than internalizing the concepts. True mastery means the knowledge is in your head, ready to be deployed without looking at a guide.\nQuestion: Are you testing your recall, or merely passively re-reading the material?",
-      "Niti: कालः पचति भूतानि कालः संहरते प्रजाः। कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time consumes all beings, time destroys all creatures. Time is awake when all are asleep; time is truly insurmountable.\nMeaning: You are facing a crisis of procrastination. Time is the only resource you cannot earn back. By delaying your work, you are surrendering your greatest strategic advantage to your competitors.\nQuestion: How many hours have you wasted today that could have been used to secure your future?"
+      "Niti: कालः पचति भूतानि कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time consumes all beings, time is truly insurmountable.\nMeaning: You are facing a crisis of procrastination. Time is the only resource you cannot earn back.\nQuestion: How many hours have you wasted today that could have been used to secure your future?"
     ]
     return wisdoms[Math.floor(Math.random() * wisdoms.length)]
   }
 
   // 4. GENERIC STUDENT FALLBACK
-  return "The StudyBuddy AI server is very busy! 🧘\n\nTake a quick 2-minute stretch break and try again. Your brain is a powerhouse—you can solve this!"
+  return "The StudyBuddy AI is taking a rest! 🧘\n\nTake a 2-minute stretch break and try again. Remember: You are the smartest person in the room—keep going!"
 }
 
 /**
@@ -84,18 +87,10 @@ export async function askGemini(prompt, systemInstruction = '') {
  */
 export const generateStudyPlan = async (subjects, timeframe) => {
   const isHours = /hour/i.test(timeframe)
-  const prompt = `Create an optimized study plan.
-Subjects: ${subjects}
-Duration: ${timeframe}
+  const prompt = `Create a study plan for ${subjects} over ${timeframe}. 
+Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
 
-Rules:
-- If duration is in HOURS: return 1 day with hourly slots (e.g. "9:00–10:30: Physics")
-- If duration is in DAYS: return one entry per day with specific goals
-
-Return ONLY valid JSON in this exact shape, no markdown, no backticks:
-{"days":[{"day":"Day 1","tasks":["Task A","Task B"]}]}`
-
-  const raw = await askGemini(prompt, 'You are a world-class academic planner. Return only valid minified JSON.')
+  const raw = await askGemini(prompt, 'You are an academic planner. Return only valid minified JSON.')
   
   try {
     const cleaned = raw
@@ -114,14 +109,14 @@ Return ONLY valid JSON in this exact shape, no markdown, no backticks:
     // Sensible fallback based on timeframe
     if (isHours) {
       const hours = parseInt(timeframe) || 3
-      const tasks = Array.from({ length: hours }, (_, i) => `${9 + i}:00–${10 + i}:00 → Study: ${subjects}`)
+      const tasks = Array.from({ length: hours }, (_, i) => `${9 + i}:00 → Study ${subjects}`)
       return { days: [{ day: 'Today', tasks }] }
     }
     const days = parseInt(timeframe) || 3
     return {
       days: Array.from({ length: days }, (_, i) => ({
         day: `Day ${i + 1}`,
-        tasks: [`Review ${subjects} — Section ${i + 1}`, 'Practice problems', 'Quick revision notes']
+        tasks: [`Focus on ${subjects} — Part ${i + 1}`, 'Review notes']
       }))
     }
   }
