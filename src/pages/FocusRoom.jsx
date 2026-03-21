@@ -93,12 +93,12 @@ export default function FocusRoom() {
       </Card>
 
       <Card className="p-6 text-left border-border/50 bg-secondary/5">
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><span>🧘</span> Deep Focus Engineering Parameters</h3>
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><span>🧘</span> Focus Tips</h3>
         <ul className="text-sm text-muted-foreground flex flex-col gap-3 font-medium">
-          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Enable Do Not Disturb on all hardware relays.</li>
-          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Terminate secondary social media application threads.</li>
-          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Initiate mandatory cooling cycles every 45 elapsed minutes.</li>
-          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Maintain optimal hydration levels (H2O buffer loaded).</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Turn on Do Not Disturb on your phone.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Close social media and distracting tabs.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Take a short break every 45 minutes.</li>
+          <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary/40 shrink-0"/> Stay hydrated — keep water nearby.</li>
         </ul>
       </Card>
     </div>

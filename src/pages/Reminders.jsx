@@ -99,12 +99,12 @@ export default function Reminders() {
       <audio ref={audioRef} src={alarmSoundUri} />
       
       <div className="mb-10 text-center lg:text-left">
-        <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight mb-2">Priority Alarms</h1>
-        <p className="text-muted-foreground text-sm">Deploy high-frequency audible relays and browser push notifications</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1">Reminders</h1>
+        <p className="text-muted-foreground text-sm">Set study reminders with notifications</p>
       </div>
       
       <Card className="p-8 mb-8 border-border/50 shadow-sm bg-gradient-to-br from-card to-secondary/5">
-        <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><span>🚨</span> Hardware Alarm Deployment</h3>
+        <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><span>🔔</span> New Reminder</h3>
         <form className="flex flex-col gap-5" onSubmit={add}>
           <div>
              <label className="font-semibold text-sm mb-2 block">Task Title</label>
@@ -113,11 +113,11 @@ export default function Reminders() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="font-semibold text-sm mb-2 block">Target Triggertime <span className="text-muted-foreground font-normal">(Optional)</span></label>
+              <label className="font-semibold text-sm mb-2 block">When <span className="text-muted-foreground font-normal">(Optional)</span></label>
               <Input type="datetime-local" value={targetTime} onChange={e => setTargetTime(e.target.value)} className="bg-background"/>
             </div>
             <div>
-              <label className="font-semibold text-sm mb-2 block">System Priority</label>
+              <label className="font-semibold text-sm mb-2 block">Priority</label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger className="w-full bg-background">
                   <SelectValue placeholder="Select Threat Level" />
@@ -131,8 +131,8 @@ export default function Reminders() {
             </div>
           </div>
           
-          <Button type="submit" size="lg" className="mt-2 w-full md:w-auto self-end font-bold tracking-wide shadow-md">
-            Arm Relay
+          <Button type="submit" size="lg" className="mt-2 w-full md:w-auto self-end font-semibold shadow-md">
+            Add Reminder
           </Button>
         </form>
       </Card>
@@ -140,8 +140,8 @@ export default function Reminders() {
       <div className="flex flex-col gap-3">
         {reminders.length === 0 && (
           <Card className="p-10 text-center text-muted-foreground border-dashed border-2 bg-secondary/5">
-            <p className="text-5xl mb-4 opacity-50">🕒</p>
-            <p className="font-semibold">All relay servers silent. No active constraints.</p>
+            <p className="text-3xl mb-3 opacity-50">🕒</p>
+            <p className="font-semibold text-muted-foreground">No reminders yet. Add one above!</p>
           </Card>
         )}
         

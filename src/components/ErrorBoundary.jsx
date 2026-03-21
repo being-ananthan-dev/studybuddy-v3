@@ -7,28 +7,28 @@ export default class ErrorBoundary extends Component {
 
   static getDerivedStateFromError(error) { return { hasError: true, error } }
 
-  componentDidCatch(error, info) { console.error('StudyBuddy Error Boundary:', error, info) }
+  componentDidCatch(error, info) { console.error('ErrorBoundary:', error, info) }
 
   render() {
     if (this.state.hasError) {
       return (
         <div className="animate-in fade-in duration-500 max-w-lg mx-auto mt-20 text-center px-6">
-          <Card className="p-10 border-destructive/20 border-2 shadow-2xl bg-destructive/5 backdrop-blur-sm">
-            <p className="text-6xl mb-6 drop-shadow-sm">⚠️</p>
-            <h2 className="text-2xl font-black tracking-tight mb-3 text-destructive">System Fault Detected</h2>
-            <p className="text-sm font-semibold text-muted-foreground mb-8 bg-background/50 p-4 rounded-lg border border-border/40 italic">
-              {this.state.error?.message || 'A catastrophic UI thread exception occurred.'}
+          <Card className="p-10 border-destructive/20 border-2 shadow-2xl bg-destructive/5">
+            <p className="text-5xl mb-5">⚠️</p>
+            <h2 className="text-xl font-bold tracking-tight mb-2 text-destructive">Something went wrong</h2>
+            <p className="text-sm text-muted-foreground mb-6 bg-background/50 p-3 rounded-lg border border-border/40">
+              {this.state.error?.message || 'An unexpected error occurred.'}
             </p>
             <Button 
               variant="destructive" 
               size="lg" 
-              className="font-bold uppercase tracking-widest shadow-lg hover:scale-105 transition-transform active:scale-95 w-full"
+              className="font-semibold w-full"
               onClick={() => {
                 this.setState({ hasError: false, error: null });
                 window.location.href = '/';
               }}
             >
-              Reboot Interface
+              Go Home
             </Button>
           </Card>
         </div>

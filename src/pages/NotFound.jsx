@@ -10,7 +10,7 @@ export default function NotFound() {
         <p className="text-7xl mb-6 drop-shadow-md animate-bounce [animation-duration:5s]">🔍</p>
         <h1 className="text-3xl font-black tracking-tight mb-2 text-foreground">404 — Page Not Found</h1>
         <p className="text-muted-foreground font-medium mb-10 max-w-[280px] mx-auto leading-relaxed">
-          The requested navigational endpoint does not exist in the current study datastore.
+          The page you're looking for doesn't exist.
         </p>
         <Button asChild size="lg" className="font-bold uppercase tracking-widest shadow-md hover:scale-105 transition-transform active:scale-95">
           <Link to="/">Go Home</Link>

@@ -9,11 +9,11 @@ import { Badge } from "@/components/ui/badge"
 const initChallenges = [
   { id: '1', title: 'First Steps', desc: 'Complete your first Pomodoro cycle', done: true, icon: '🌟', xp: 50 },
   { id: '2', title: 'Night Owl', desc: 'Study successfully past midnight', done: true, icon: '🦉', xp: 75 },
-  { id: '3', title: 'Streak Master', desc: 'Sustain study streaks for 7 days in a row', done: false, icon: '🔥', xp: 150 },
-  { id: '4', title: 'AI Scholar', desc: 'Interact 50 times with the embedded AI model', done: false, icon: '🧠', xp: 200 },
-  { id: '5', title: 'Note Taker', desc: 'Log 20 active semantic markdown notes', done: false, icon: '📝', xp: 100 },
-  { id: '6', title: 'Social Learner', desc: 'Transmit 10 global group chat messages', done: false, icon: '💬', xp: 80 },
-  { id: '7', title: 'Focus Champ', desc: 'Log more than 5 hours total focus time', done: false, icon: '🏅', xp: 250 },
+  { id: '3', title: 'Streak Master', desc: 'Keep a 7-day study streak', done: false, icon: '🔥', xp: 150 },
+  { id: '4', title: 'AI Scholar', desc: 'Ask 50 questions to the AI Tutor', done: false, icon: '🧠', xp: 200 },
+  { id: '5', title: 'Note Taker', desc: 'Save 20 study notes', done: false, icon: '📝', xp: 100 },
+  { id: '6', title: 'Social Learner', desc: 'Send 10 messages in group chat', done: false, icon: '💬', xp: 80 },
+  { id: '7', title: 'Focus Champ', desc: 'Accumulate 5+ hours of focus time', done: false, icon: '🏅', xp: 250 },
   { id: '8', title: 'Voice Master', desc: 'Complete 5 AI-graded oral test evaluations', done: false, icon: '🎤', xp: 175 },
 ]
 
@@ -34,7 +34,7 @@ export default function Challenges() {
     <div className="animate-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight mb-2">Challenges & Badges</h1>
-        <p className="text-muted-foreground text-sm">Unlock platform achievements as you solidify neural pathways</p>
+        <p className="text-muted-foreground text-sm">Earn badges as you study and complete goals</p>
       </div>
 
       <Card className="p-8 mb-10 border-border/50 shadow-sm bg-gradient-to-br from-primary/5 to-transparent">
