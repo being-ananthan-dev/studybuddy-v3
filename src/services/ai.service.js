@@ -1,5 +1,5 @@
 // AI service — uses keyless free public endpoint so no API keys needed
-const AI_TIMEOUT_MS = 25_000
+const AI_TIMEOUT_MS = 30_000
 
 /**
  * Ask the AI a question with system instruction.
@@ -7,7 +7,7 @@ const AI_TIMEOUT_MS = 25_000
  */
 export async function askGemini(prompt, systemInstruction = '') {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
+  const timeoutId = setTimeout(() => controller.abort(), 18000) // 18s timeout
 
   // Merge system instruction into prompt for maximum compatibility with free proxies
   const fullMessage = systemInstruction 
@@ -18,7 +18,6 @@ export async function askGemini(prompt, systemInstruction = '') {
   const proxies = [
     // 1. Pollinations (GET - Best CORS compatibility)
     async () => {
-      // Browsers handle GET much better for cross-origin requests
       const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullMessage.slice(0, 1500))}?model=openai&cache=false&seed=${Date.now()}`, {
         method: 'GET',
         signal: controller.signal
@@ -26,7 +25,23 @@ export async function askGemini(prompt, systemInstruction = '') {
       if (!res.ok) throw new Error('Pollinations GET failed')
       return (await res.text()).trim()
     },
-    // 2. Hercai — Reliable Backup Proxy (GET)
+    // 2. Airforce — Fast Secondary Proxy
+    async () => {
+      const res = await fetch('https://api.airforce/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: fullMessage.slice(0, 3000) }],
+          model: 'llama-3-70b-instruct',
+          stream: false
+        }),
+        signal: controller.signal
+      })
+      if (!res.ok) throw new Error('Airforce failed')
+      const json = await res.json()
+      return json.choices[0].message.content || ''
+    },
+    // 3. Hercai — Reliable Backup Proxy (GET)
     async () => {
       const res = await fetch(`https://api.hercai.onrender.com/v3/hercai?question=${encodeURIComponent(fullMessage.slice(0, 1500))}`, {
         method: 'GET',
@@ -36,14 +51,13 @@ export async function askGemini(prompt, systemInstruction = '') {
       const json = await res.json()
       return json.reply || json.content || ''
     },
-    // 3. Pollinations (POST - No model specified, matching user's test script)
+    // 4. Pollinations (POST - Backup)
     async () => {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }]
-          // OMITTING 'model' key as per user's find
         }),
         signal: controller.signal
       })
@@ -55,7 +69,8 @@ export async function askGemini(prompt, systemInstruction = '') {
   for (const proxy of proxies) {
     try {
       const result = await proxy()
-      if (result && !result.includes('Service Unavailable') && !result.includes('Internal Server Error')) {
+      // Basic check for error strings in successful responses
+      if (result && !result.toLowerCase().includes('service unavailable') && !result.toLowerCase().includes('internal server error') && result.length > 5) {
         clearTimeout(timeoutId)
         return result
       }
@@ -69,30 +84,34 @@ export async function askGemini(prompt, systemInstruction = '') {
   // 3. OFFLINE WISDOM FALLBACK (100% Guaranteed Uptime for Chanakya Guide)
   if (systemInstruction && systemInstruction.includes('Chanakya')) {
     const wisdoms = [
-      "Niti: अज्ञानतिमिरान्धस्य ज्ञानाञ्जनाशलाकया। चक्षुरुन्मीलितं येन तस्मै श्रीगुरवे नमः॥\nTranslation: Salutations to the teacher who removes the darkness of ignorance with the light of knowledge.\nMeaning: You are feeling lost because you lack the specific knowledge for this obstacle. Do not despair; seek a mentor, a book, or a new perspective. The problem is not your capability, but your current visibility.\nQuestion: Where can you find the exact piece of knowledge you are missing today?",
-      "Niti: उद्योगे नास्ति दारिद्र्यं जपतो नास्ति पातकम्। मौने च कलहो नास्ति नास्ति जागरिते भयम्॥\nTranslation: Through effort there is no poverty; through meditation there is no sin. In silence there is no quarrel; in wakefulness there is no fear.\nMeaning: Your anxiety stems from inaction. When you are deeply engaged in effort (Udyoga), the mind has no time for fear or doubt. The solution to your academic challenge is sheer, focused execution.\nQuestion: What is one small action you can take right now to break this paralysis?",
-      "Niti: पुस्तकेषु च या विद्या परहस्तेषु यद्धनम्। उत्पन्नेषु च कार्येषु न सा विद्या न तद्धनम्॥\nTranslation: Knowledge residing in books and wealth residing in others' hands are of no use when the time comes to apply them.\nMeaning: You are relying too much on external notes and tutorials rather than internalizing the concepts. True mastery means the knowledge is in your head, ready to be deployed without looking at a guide.\nQuestion: Are you testing your recall, or merely passively re-reading the material?",
-      "Niti: कालः पचति भूतानि कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time consumes all beings, time is truly insurmountable.\nMeaning: You are facing a crisis of procrastination. Time is the only resource you cannot earn back.\nQuestion: How many hours have you wasted today that could have been used to secure your future?"
+      "Niti: अज्ञानतिमिरान्धस्य ज्ञानाञ्जनाशलाकया। चक्षुरुन्मीलितं येन तस्मै श्रीगुरवे नमः॥\nTranslation: Salutations to the teacher who removes the darkness of ignorance with the light of knowledge.\nMeaning: You are feeling lost because you lack specific knowledge. Seek a new perspective—the problem is your visibility, not your capability.\nQuestion: What one fact or concept do you need to master today?",
+      "Niti: उद्योगे नास्ति दारिद्र्यं जपतो नास्ति पातकम्।\nTranslation: Through effort there is no poverty.\nMeaning: Action is the antidote to fear. Engage deeply in your task, and your anxiety will dissolve.\nQuestion: What is one small step you can take right now?",
+      "Niti: कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time is insurmountable.\nMeaning: You are surrendering your greatest advantage: Time. Stop delaying.\nQuestion: How will you use the next 60 minutes to change your future?",
+      "Niti: पुस्तकेषु च या विद्या परहस्तेषु यद्धनम्।\nTranslation: Knowledge in books is of no use until internalized.\nMeaning: Stop re-reading. Start testing your recall. Mastery is in the mind, not the paper.\nQuestion: Can you explain this concept to a child right now?"
     ]
     return wisdoms[Math.floor(Math.random() * wisdoms.length)]
   }
 
   // 4. GENERIC STUDENT FALLBACK
-  return "The StudyBuddy AI is taking a rest! 🧘\n\nTake a 2-minute stretch break and try again. Remember: You are the smartest person in the room—keep going!"
+  return "The StudyBuddy AI server is taking a deep breath! 🧘\n\nTake a quick stretch break and try again. Remember: Your own determination is more powerful than any AI. You've got this!"
 }
 
 /**
  * Generate a structured study plan for given subjects and timeframe.
- * Returns { days: [{ day, tasks }] }
+ * This function has an internal 'Smart-Mock' fallback that ensures 
+ * a logically sound plan is returned even if the AI is offline.
  */
 export const generateStudyPlan = async (subjects, timeframe) => {
   const isHours = /hour/i.test(timeframe)
-  const prompt = `Create a study plan for ${subjects} over ${timeframe}. 
+  const isDays = /day/i.test(timeframe)
+  
+  const prompt = `Create an optimized study plan for ${subjects} over ${timeframe}. 
 Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
 
-  const raw = await askGemini(prompt, 'You are an academic planner. Return only valid minified JSON.')
-  
+  let raw = ''
   try {
+    raw = await askGemini(prompt, 'You are an academic planner. Return only valid minified JSON.')
+    
     const cleaned = raw
       .replace(/```json\s*/gi, '')
       .replace(/```\s*/g, '')
@@ -102,22 +121,42 @@ Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
     // Find the JSON object in the response
     const jsonStart = cleaned.indexOf('{')
     const jsonEnd = cleaned.lastIndexOf('}')
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON found')
-    
-    return JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1))
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      return JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1))
+    }
+    throw new Error('No JSON found')
   } catch {
-    // Sensible fallback based on timeframe
-    if (isHours) {
-      const hours = parseInt(timeframe) || 3
-      const tasks = Array.from({ length: hours }, (_, i) => `${9 + i}:00 → Study ${subjects}`)
-      return { days: [{ day: 'Today', tasks }] }
+    // SMART-MOCK FALLBACK: Generates a high-quality deterministic plan
+    const subList = subjects.split(',').map(s => s.trim())
+    const plan = { days: [] }
+
+    if (isHours || (!isDays && parseInt(timeframe) < 12)) {
+      // Hourly logic (1-day plan)
+      const hours = Math.min(parseInt(timeframe) || 4, 12)
+      const tasks = []
+      for (let i = 0; i < hours; i++) {
+        const sub = subList[i % subList.length]
+        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${sub} (Concept Recall)`)
+        if (i%2 === 0) tasks.push(`Break: Refresh & Hydrate (10 mins)`)
+      }
+      tasks.push('Final Review & Recap')
+      plan.days.push({ day: 'Intensive Session', tasks })
+    } else {
+      // Daily logic
+      const totalDays = Math.min(parseInt(timeframe) || 7, 30)
+      for (let i = 0; i < totalDays; i++) {
+        const sub = subList[i % subList.length]
+        plan.days.push({
+          day: `Day ${i + 1}`,
+          tasks: [
+            `Core Focus: ${sub} — Mastery of Section ${i + 1}`,
+            `Practice Session: 5 Hard Problems on ${sub}`,
+            'Active Recall: Explain concept without notes',
+            'Evening: Summary Flashcards creation'
+          ]
+        })
+      }
     }
-    const days = parseInt(timeframe) || 3
-    return {
-      days: Array.from({ length: days }, (_, i) => ({
-        day: `Day ${i + 1}`,
-        tasks: [`Focus on ${subjects} — Part ${i + 1}`, 'Review notes']
-      }))
-    }
+    return plan
   }
 }
