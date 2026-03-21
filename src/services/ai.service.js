@@ -7,16 +7,27 @@ const AI_TIMEOUT_MS = 30_000
  */
 export async function askGemini(prompt, systemInstruction = '') {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 20000) // 20s timeout for single requests
+  const timeoutId = setTimeout(() => controller.abort(), 20000) // 20s timeout per attempt
 
-  // Merge system instruction into prompt for maximum compatibility with free proxies
   const fullMessage = systemInstruction 
     ? `System Instructions:\n${systemInstruction}\n\nUser Question:\n${prompt}` 
     : prompt
 
   // PROXY CHAIN — TRY ROBUST METHODS
   const proxies = [
-    // 1. Pollinations (GET - Best CORS compatibility)
+    // 1. Vercel Serverless Proxy (Ultimate CORS Bypass for Production)
+    async () => {
+      // Relative path works correctly on the hosted Vercel domain
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, systemInstruction }),
+        signal: controller.signal
+      })
+      if (!res.ok) throw new Error('Vercel API Proxy failed')
+      return await res.text()
+    },
+    // 2. Pollinations (GET - Client-side fallback)
     async () => {
       const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullMessage.slice(0, 1200))}?model=openai&cache=false&seed=${Date.now()}`, {
         method: 'GET',
@@ -25,7 +36,7 @@ export async function askGemini(prompt, systemInstruction = '') {
       if (!res.ok) throw new Error('Pollinations GET failed')
       return (await res.text()).trim()
     },
-    // 2. OllamaFreeAPI (New Alternative to Airforce)
+    // 3. OllamaFreeAPI (Client-side fallback)
     async () => {
       const res = await fetch('https://ollama.fynal.net/v1/chat/completions', {
         method: 'POST',
@@ -41,7 +52,7 @@ export async function askGemini(prompt, systemInstruction = '') {
       const json = await res.json()
       return json.choices[0].message.content || ''
     },
-    // 3. Hercai — Reliable Backup Proxy (GET)
+    // 4. Hercai (GET - Client-side fallback)
     async () => {
       const res = await fetch(`https://api.hercai.onrender.com/v3/hercai?question=${encodeURIComponent(fullMessage.slice(0, 1500))}`, {
         method: 'GET',
@@ -50,27 +61,12 @@ export async function askGemini(prompt, systemInstruction = '') {
       if (!res.ok) throw new Error('Hercai failed')
       const json = await res.json()
       return json.reply || json.content || ''
-    },
-    // 4. Pollinations (POST)
-    async () => {
-      const res = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: fullMessage.slice(0, 4000) }],
-          model: 'mistral'
-        }),
-        signal: controller.signal
-      })
-      if (!res.ok) throw new Error('Pollinations POST failed')
-      return (await res.text()).trim()
     }
   ]
 
   for (const proxy of proxies) {
     try {
       const result = await proxy()
-      // Basic check for error strings in successful responses
       if (result && 
           !result.toLowerCase().includes('service unavailable') && 
           !result.toLowerCase().includes('internal server error') && 
@@ -86,19 +82,18 @@ export async function askGemini(prompt, systemInstruction = '') {
 
   clearTimeout(timeoutId)
 
-  // 3. OFFLINE WISDOM FALLBACK (100% Guaranteed Uptime for Chanakya Guide)
+  // 3. OFFLINE WISDOM FALLBACK (Chanakya)
   if (systemInstruction && systemInstruction.includes('Chanakya')) {
     const wisdoms = [
-      "Niti: अज्ञानतिमिरान्धस्य ज्ञानाञ्जनाशलाकया। चक्षुरुन्मीलितं येन तस्मै श्रीगुरवे नमः॥\nTranslation: Salutations to the teacher who removes the darkness of ignorance with the light of knowledge.\nMeaning: You are feeling lost because you lack specific knowledge. Seek a new perspective—the problem is your visibility, not your capability.\nQuestion: What one fact or concept do you need to master today?",
-      "Niti: उद्योगे नास्ति दारिद्र्यं जपतो नास्ति पातकम्।\nTranslation: Through effort there is no poverty.\nMeaning: Action is the antidote to fear. Engage deeply in your task, and your anxiety will dissolve.\nQuestion: What is one small step you can take right now?",
-      "Niti: कालः सुप्तेषु जागर्ति कालो हि दुरतिक्रमः॥\nTranslation: Time is insurmountable.\nMeaning: You are surrendering your greatest advantage: Time. Stop delaying.\nQuestion: How will you use the next 60 minutes to change your future?",
-      "Niti: पुस्तकेषु च या विद्या परहस्तेषु यद्धनम्।\nTranslation: Knowledge in books is of no use until internalized.\nMeaning: Stop re-reading. Start testing your recall. Mastery is in the mind, not the paper.\nQuestion: Can you explain this concept to a child right now?"
+      "Niti: अज्ञानतिमिरान्धस्य ज्ञानाञ्जनाशलाकया।\nTranslation: Salutations to the teacher who removes ignorance.\nMeaning: Seek knowledge—the problem is your visibility, not your capability.",
+      "Niti: उद्योगे नास्ति दारिद्र्यं।\nTranslation: Through effort there is no poverty.\nMeaning: Action is the antidote to fear.",
+      "Niti: कालः सुप्तेषु जागर्ति।\nTranslation: Time is insurmountable.\nMeaning: Work now, for time never returns.",
+      "Niti: पुस्तकेषु च या विद्या।\nTranslation: Knowledge in books is of no use until internalized.\nMeaning: Practice active recall."
     ]
     return wisdoms[Math.floor(Math.random() * wisdoms.length)]
   }
 
-  // 4. GENERIC STUDENT FALLBACK
-  return "The StudyBuddy AI server is taking a deep breath! 🧘\n\nTake a quick stretch break and try again. Remember: Your own determination is more powerful than any AI. You've got this!"
+  return "The StudyBuddy AI server is taking a deep breath! 🧘\n\nTake a quick stretch break and try again. Yourown determination is more powerful than any AI. You've got this!"
 }
 
 /**
@@ -121,7 +116,6 @@ Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
       .replace(/^\s*[\r\n]+/gm, '')
       .trim()
     
-    // Find the JSON object in the response
     const jsonStart = cleaned.indexOf('{')
     const jsonEnd = cleaned.lastIndexOf('}')
     if (jsonStart !== -1 && jsonEnd !== -1) {
@@ -132,29 +126,19 @@ Return ONLY valid JSON: {"days":[{"day":"Day 1","tasks":["Task A"]}]}`
     // SMART-MOCK FALLBACK
     const subList = subjects.split(',').map(s => s.trim())
     const plan = { days: [] }
-
     if (isHours || (!isDays && parseInt(timeframe) < 12)) {
       const hours = Math.min(parseInt(timeframe) || 4, 12)
       const tasks = []
       for (let i = 0; i < hours; i++) {
-        const sub = subList[i % subList.length]
-        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${sub}`)
-        if (i%2 === 0) tasks.push(`Short Break: 10 mins`)
+        tasks.push(`${9+i}:00–${10+i}:00 → Deep Focus: ${subList[i % subList.length]}`)
       }
-      tasks.push('Final Review')
       plan.days.push({ day: 'Intensive Session', tasks })
     } else {
       const totalDays = Math.min(parseInt(timeframe) || 7, 30)
       for (let i = 0; i < totalDays; i++) {
-        const sub = subList[i % subList.length]
         plan.days.push({
           day: `Day ${i + 1}`,
-          tasks: [
-            `Study ${sub} — Mastery Phase ${i + 1}`,
-            `Practice Exam Problems for ${sub}`,
-            'Active Recall Session',
-            'Evening Prep'
-          ]
+          tasks: [`Mastery: ${subList[i % subList.length]}`, 'Active Recall', 'Practice Exam']
         })
       }
     }
